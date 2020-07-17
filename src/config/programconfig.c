@@ -22,8 +22,8 @@ ProgramConfiguration createdefaultprogramconfig() {
 	strcpy(program.directory, "");
 	strcpy(program.environment, "");
 
-	program.stdout = createlogger("");
-	program.stderr = createlogger("");
+	program.stdout_log = createlogger("");
+	program.stderr_log = createlogger("");
 
 	return program;
 }

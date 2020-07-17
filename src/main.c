@@ -4,7 +4,7 @@
 
 int main(int argv, char **argc)
 {
-	
-	readfromfile("supervisord.conf");
+	Configuration *configuration = readfromfile("supervisord.conf");
+	printf(configuration->programs->program.user);
 	return 0;
 }

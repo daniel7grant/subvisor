@@ -232,51 +232,51 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stdout_logfile") == 0)
 		{
-			strcpy(programlist->program.stdout.logfile, value);
+			strcpy(programlist->program.stdout_log.logfile, value);
 		}
 		if (strcmp(key, "stdout_logfile_maxbytes") == 0)
 		{
-			programlist->program.stdout.logfile_maxbytes = byte(value);
+			programlist->program.stdout_log.logfile_maxbytes = byte(value);
 		}
 		if (strcmp(key, "stdout_logfile_backups") == 0)
 		{
-			programlist->program.stdout.logfile_backups = atoi(value);
+			programlist->program.stdout_log.logfile_backups = atoi(value);
 		}
 		if (strcmp(key, "stdout_capture_maxbytes") == 0)
 		{
-			programlist->program.stdout.capture_maxbytes = byte(value);
+			programlist->program.stdout_log.capture_maxbytes = byte(value);
 		}
 		if (strcmp(key, "stdout_syslog") == 0)
 		{
-			programlist->program.stdout.syslog = bool(value);
+			programlist->program.stdout_log.syslog = bool(value);
 		}
 		if (strcmp(key, "stdout_events_enabled") == 0)
 		{
-			programlist->program.stdout.events_enabled = bool(value);
+			programlist->program.stdout_log.events_enabled = bool(value);
 		}
 		if (strcmp(key, "stderr_logfile") == 0)
 		{
-			strcpy(programlist->program.stderr.logfile, value);
+			strcpy(programlist->program.stderr_log.logfile, value);
 		}
 		if (strcmp(key, "stderr_logfile_maxbytes") == 0)
 		{
-			programlist->program.stderr.logfile_maxbytes = byte(value);
+			programlist->program.stderr_log.logfile_maxbytes = byte(value);
 		}
 		if (strcmp(key, "stderr_logfile_backups") == 0)
 		{
-			programlist->program.stderr.logfile_backups = atoi(value);
+			programlist->program.stderr_log.logfile_backups = atoi(value);
 		}
 		if (strcmp(key, "stderr_capture_maxbytes") == 0)
 		{
-			programlist->program.stderr.capture_maxbytes = byte(value);
+			programlist->program.stderr_log.capture_maxbytes = byte(value);
 		}
 		if (strcmp(key, "stderr_syslog") == 0)
 		{
-			programlist->program.stderr.syslog = bool(value);
+			programlist->program.stderr_log.syslog = bool(value);
 		}
 		if (strcmp(key, "stderr_events_enabled") == 0)
 		{
-			programlist->program.stderr.events_enabled = bool(value);
+			programlist->program.stderr_log.events_enabled = bool(value);
 		}
 	}
 	else if (strncmp(block, "group", strlen("group")) == 0)

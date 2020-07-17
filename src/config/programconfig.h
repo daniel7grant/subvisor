@@ -18,8 +18,8 @@ typedef enum PROGRAM_AUTORESTART
 typedef struct ProgramConfiguration
 {
 	char command[MAX_LINE_LENGTH];
-	Logger stdout;
-	Logger stderr;
+	Logger stdout_log;
+	Logger stderr_log;
 	char process_name[MAX_LINE_LENGTH];
 	int numprocs;
 	int numprocs_start;
