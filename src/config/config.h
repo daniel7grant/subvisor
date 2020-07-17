@@ -16,6 +16,6 @@ typedef struct Configuration
 	ProgramList *programs;
 } Configuration;
 
-extern Configuration *readfromfile(char *filename);
+extern Configuration *readfromfile(char *filename, char **arguments);
 
 #endif

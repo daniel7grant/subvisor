@@ -10,22 +10,22 @@ int whitespace(char c)
 	return c == ' ' || c == '\r' || c == '\n' || c == '\t';
 }
 
-int bool(char *var)
+int toboolean(char *var)
 {
 	return strcmp(var, "true") == 0 || strcmp(var, "1") == 0;
 }
 
-int byte(char *var)
+int tobyte(char *var)
 {
 	return atoi(var);
 }
 
-int loglevel(char *var)
+int tologlevel(char *var)
 {
 	return atoi(var);
 }
 
-int exitcode(char *var)
+int toexitcode(char *var)
 {
 	return atoi(var);
 }
@@ -88,7 +88,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "nodaemon") == 0)
 		{
-			configuration->baseconfiguration.nodaemon = bool(value);
+			configuration->baseconfiguration.nodaemon = toboolean(value);
 		}
 		if (strcmp(key, "minfds") == 0)
 		{
@@ -112,7 +112,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "strip_ansi") == 0)
 		{
-			configuration->baseconfiguration.strip_ansi = bool(value);
+			configuration->baseconfiguration.strip_ansi = toboolean(value);
 		}
 		if (strcmp(key, "identifier") == 0)
 		{
@@ -124,7 +124,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "nocleanup") == 0)
 		{
-			configuration->baseconfiguration.nocleanup = bool(value);
+			configuration->baseconfiguration.nocleanup = toboolean(value);
 		}
 		if (strcmp(key, "childlogdir") == 0)
 		{
@@ -136,11 +136,11 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "logfile_maxbytes") == 0)
 		{
-			configuration->baseconfiguration.log.logfile_maxbytes = byte(value);
+			configuration->baseconfiguration.log.logfile_maxbytes = tobyte(value);
 		}
 		if (strcmp(key, "loglevel") == 0)
 		{
-			configuration->baseconfiguration.log.loglevel = loglevel(value);
+			configuration->baseconfiguration.log.loglevel = tologlevel(value);
 		}
 		if (strcmp(key, "logfile_backups") == 0)
 		{
@@ -180,7 +180,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "autostart") == 0)
 		{
-			programlist->program.autostart = bool(value);
+			programlist->program.autostart = toboolean(value);
 		}
 		if (strcmp(key, "autorestart") == 0)
 		{
@@ -196,7 +196,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "exitcodes") == 0)
 		{
-			programlist->program.exitcodes = exitcode(value);
+			programlist->program.exitcodes = toexitcode(value);
 		}
 		if (strcmp(key, "stopsignal") == 0)
 		{
@@ -208,15 +208,15 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stopasgroup") == 0)
 		{
-			programlist->program.stopasgroup = bool(value);
+			programlist->program.stopasgroup = toboolean(value);
 		}
 		if (strcmp(key, "killasgroup") == 0)
 		{
-			programlist->program.killasgroup = bool(value);
+			programlist->program.killasgroup = toboolean(value);
 		}
 		if (strcmp(key, "redirect_stderr") == 0)
 		{
-			programlist->program.redirect_stderr = bool(value);
+			programlist->program.redirect_stderr = toboolean(value);
 		}
 		if (strcmp(key, "user") == 0)
 		{
@@ -236,7 +236,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stdout_logfile_maxbytes") == 0)
 		{
-			programlist->program.stdout_log.logfile_maxbytes = byte(value);
+			programlist->program.stdout_log.logfile_maxbytes = tobyte(value);
 		}
 		if (strcmp(key, "stdout_logfile_backups") == 0)
 		{
@@ -244,15 +244,15 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stdout_capture_maxbytes") == 0)
 		{
-			programlist->program.stdout_log.capture_maxbytes = byte(value);
+			programlist->program.stdout_log.capture_maxbytes = tobyte(value);
 		}
 		if (strcmp(key, "stdout_syslog") == 0)
 		{
-			programlist->program.stdout_log.syslog = bool(value);
+			programlist->program.stdout_log.syslog = toboolean(value);
 		}
 		if (strcmp(key, "stdout_events_enabled") == 0)
 		{
-			programlist->program.stdout_log.events_enabled = bool(value);
+			programlist->program.stdout_log.events_enabled = toboolean(value);
 		}
 		if (strcmp(key, "stderr_logfile") == 0)
 		{
@@ -260,7 +260,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stderr_logfile_maxbytes") == 0)
 		{
-			programlist->program.stderr_log.logfile_maxbytes = byte(value);
+			programlist->program.stderr_log.logfile_maxbytes = tobyte(value);
 		}
 		if (strcmp(key, "stderr_logfile_backups") == 0)
 		{
@@ -268,15 +268,15 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		if (strcmp(key, "stderr_capture_maxbytes") == 0)
 		{
-			programlist->program.stderr_log.capture_maxbytes = byte(value);
+			programlist->program.stderr_log.capture_maxbytes = tobyte(value);
 		}
 		if (strcmp(key, "stderr_syslog") == 0)
 		{
-			programlist->program.stderr_log.syslog = bool(value);
+			programlist->program.stderr_log.syslog = toboolean(value);
 		}
 		if (strcmp(key, "stderr_events_enabled") == 0)
 		{
-			programlist->program.stderr_log.events_enabled = bool(value);
+			programlist->program.stderr_log.events_enabled = toboolean(value);
 		}
 	}
 	else if (strncmp(block, "group", strlen("group")) == 0)
@@ -300,7 +300,81 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 	return 0;
 }
 
-Configuration *readfromfile(char *filename)
+int parseline(char *line, char *pair[2])
+{
+	int i = 0, key = 0, value = 0, end = 0;
+
+	// SKIP STARTING WHITESPACE
+	while (whitespace(line[i]))
+	{
+		key = ++i;
+	}
+
+	// IF STARTS WITH COMMENT SIGN, SKIP
+	if (endofline(line[i]))
+	{
+		pair[0] = 0;
+		pair[1] = 0;
+		return 0;
+	}
+
+	// IF STARTS WITH '[', CREATE NEW BLOCK
+	if (line[i] == '[')
+	{
+		key = ++i;
+		while (line[i] != ']' && !endofline(line[i]))
+		{
+			++i;
+		}
+		if (endofline(line[i]))
+		{
+			return 1;
+		}
+		line[i] = '\0';
+
+		pair[0] = &line[key];
+		pair[1] = 0;
+		return 0;
+	}
+
+	// GO UNTIL THERE IS AN EQUAL SIGN OR EOL
+	while (line[i] != '=' && !endofline(line[i]))
+	{
+		if (!whitespace(line[i]))
+		{
+			end = i;
+		}
+		++i;
+	}
+
+	// FAIL IF THERE IS NO KEY-VALUE PAIR
+	if (endofline(line[i]))
+	{
+		return 1;
+	}
+	line[end + 1] = '\0';
+
+	do
+	{
+		value = ++i;
+	} while (whitespace(line[i]));
+
+	while (!endofline(line[i]))
+	{
+		if (!whitespace(line[i]))
+		{
+			end = i;
+		}
+		++i;
+	}
+	line[end + 1] = '\0';
+	
+	pair[0] = &line[key];
+	pair[1] = &line[value];
+	return 0;
+}
+
+Configuration *readfromfile(char *filename, char **arguments)
 {
 	FILE *conffile = fopen(filename, "r");
 	if (conffile == NULL)
@@ -310,77 +384,49 @@ Configuration *readfromfile(char *filename)
 
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 
-	int i = 0, key = 0, value = 0, end = 0;
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	while (fgets(line, MAX_LINE_LENGTH, conffile) != NULL)
 	{
-		i = 0;
-		key = 0;
-		value = 0;
-
-		// SKIP STARTING WHITESPACE
-		while (whitespace(line[i]))
+		char *pair[2];
+		if (parseline(line, pair))
 		{
-			key = ++i;
-		}
-
-		// IF STARTS WITH COMMENT SIGN, SKIP
-		if (endofline(line[i]))
-		{
-			continue;
-		}
-
-		// IF STARTS WITH '[', CREATE NEW BLOCK
-		if (line[i] == '[')
-		{
-			key = ++i;
-			while (line[i] != ']' && !endofline(line[i]))
-			{
-				++i;
-			}
-			if (endofline(line[i]))
-			{
-				return NULL;
-			}
-			line[i] = '\0';
-			strcpy(block, &line[key]);
-			initializeblock(configuration, block);
-			continue;
-		}
-
-		// GO UNTIL THERE IS AN EQUAL SIGN OR EOL
-		while (line[i] != '=' && !endofline(line[i]))
-		{
-			if (!whitespace(line[i]))
-			{
-				end = i;
-			}
-			++i;
-		}
-
-		// FAIL IF THERE IS NO KEY-VALUE PAIR
-		if (endofline(line[i]))
-		{
+			// CONFIGURATION FAILED
 			return NULL;
 		}
-		line[end + 1] = '\0';
 
-		do
+		if (pair[0] != 0 && pair[1] == 0)
 		{
-			value = ++i;
-		} while (whitespace(line[i]));
-
-		while (!endofline(line[i]))
-		{
-			if (!whitespace(line[i]))
-			{
-				end = i;
-			}
-			++i;
+			// CREATE NEW BLOCK
+			strcpy(block, pair[0]);
+			initializeblock(configuration, block);
 		}
-		line[end + 1] = '\0';
-		setconfigvariable(configuration, block, &line[key], &line[value]);
+		else if (pair[0] != 0 && pair[1] != 0)
+		{
+			// ADD NEW KEY-VALUE PAIR
+			setconfigvariable(configuration, block, pair[0], pair[1]);
+		}
+	}
+
+	// MERGE WITH ARGUMENTS FROM THE COMMAND LINE
+	strcpy(block, "subvisord");
+	int k = 0;
+	while (arguments[k] != NULL)
+	{
+		char *pair[2];
+		strcpy(line, arguments[k]);
+		if (parseline(line, pair))
+		{
+			// CONFIGURATION FAILED
+			return NULL;
+		}
+
+		if (pair[0] != 0 && pair[1] != 0)
+		{
+			// ADD NEW KEY-VALUE PAIR
+			setconfigvariable(configuration, block, pair[0], pair[1]);
+		}
+		++k;
 	}
 
 	free(block);
