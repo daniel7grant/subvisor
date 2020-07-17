@@ -13,75 +13,75 @@ void addtoarguments(char ***arguments, char *arg)
 
 error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
-	char **arguments = (char **)state->input;
+	struct arguments *arguments = (struct arguments *)state->input;
+	char **configurations = arguments->configurationlist;
 
 	char *buffer = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	memset(buffer, 0, MAX_LINE_LENGTH * sizeof(char));
 	switch (key)
 	{
 	case 'v':
-		addtoarguments(&arguments, "verbose=true");
+		arguments->verbosity = 1;
 		break;
 	case 'c':
-		sprintf(buffer, "configuration=%s", arg);
-		addtoarguments(&arguments, buffer);
+		strcpy(arguments->configurationfile, arg);
 		break;
 	case 'n':
-		addtoarguments(&arguments, "nodaemon=true");
+		addtoarguments(&configurations, "nodaemon=true");
 		break;
 	case 's':
-		addtoarguments(&arguments, "silent=true");
+		arguments->verbosity = -1;
 		break;
 	case 'u':
 		sprintf(buffer, "user=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'm':
 		sprintf(buffer, "umask=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'd':
 		sprintf(buffer, "directory=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'l':
 		sprintf(buffer, "logfile=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'y':
 		sprintf(buffer, "logfile_maxbytes=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'z':
 		sprintf(buffer, "logfile_backups=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'e':
 		sprintf(buffer, "loglevel=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'j':
 		sprintf(buffer, "pidfile=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'i':
 		sprintf(buffer, "identifier=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'q':
 		sprintf(buffer, "childlogdir=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 'k':
-		addtoarguments(&arguments, "nocleanup=true");
+		addtoarguments(&configurations, "nocleanup=true");
 		break;
 	case 'a':
 		sprintf(buffer, "minfds=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 	case 't':
 		sprintf(buffer, "strip_ansi=%s", arg);
-		addtoarguments(&arguments, buffer);
+		addtoarguments(&configurations, buffer);
 		break;
 		// minprocs
 		// profile_options
@@ -95,4 +95,11 @@ error_t parse_opt(int key, char *arg, struct argp_state *state)
 	}
 	free(buffer);
 	return 0;
+}
+
+void freearguments(struct arguments arguments) {
+	free(arguments.configurationfile);
+	for (int i = 0; arguments.configurationlist[i] != NULL; ++i) {
+		free(arguments.configurationlist[i]);
+	}
 }

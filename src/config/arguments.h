@@ -30,6 +30,14 @@ static struct argp_option options[] = {
 	{"profile_options", 0, "OPTS", 0, "run supervisord under profiler and output results based on OPTIONS, which  is a comma-sep'd list of 'cumulative', 'calls', and/or 'callers', e.g. 'cumulative,callers')", 0},
 	{0}};
 
+struct arguments {
+	char *configurationlist[MAX_ARGUMENTS];
+	char *configurationfile;
+	int verbosity;
+};
+
 error_t parse_opt(int key, char *arg, struct argp_state *state);
+
+void freearguments(struct arguments arguments);
 
 #endif
