@@ -50,5 +50,6 @@ extern ProgramConfiguration createdefaultprogramconfig();
 
 extern ProgramList *pushtoprogramlist(ProgramList *programlist, ProgramConfiguration config);
 extern ProgramList *peekprogramlist(ProgramList *programlist);
+extern void freeprogramlist(ProgramList* programlist);
 
 #endif

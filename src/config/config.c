@@ -383,6 +383,7 @@ Configuration *readfromfile(char *filename, char **arguments)
 	}
 
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
 
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
@@ -392,6 +393,9 @@ Configuration *readfromfile(char *filename, char **arguments)
 		if (parseline(line, pair))
 		{
 			// CONFIGURATION FAILED
+			free(block);
+			free(line);
+			fclose(conffile);
 			return NULL;
 		}
 
@@ -418,6 +422,9 @@ Configuration *readfromfile(char *filename, char **arguments)
 		if (parseline(line, pair))
 		{
 			// CONFIGURATION FAILED
+			free(block);
+			free(line);
+			fclose(conffile);
 			return NULL;
 		}
 
@@ -434,4 +441,9 @@ Configuration *readfromfile(char *filename, char **arguments)
 	fclose(conffile);
 
 	return configuration;
+}
+
+extern void freeconfiguration(Configuration* configuration){
+	freeprogramlist(configuration->programs);
+	free(configuration);
 }

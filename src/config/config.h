@@ -17,5 +17,6 @@ typedef struct Configuration
 } Configuration;
 
 extern Configuration *readfromfile(char *filename, char **arguments);
+extern void freeconfiguration(Configuration* configuration);
 
 #endif

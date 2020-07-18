@@ -49,3 +49,11 @@ ProgramList *pushtoprogramlist(ProgramList *programlist, ProgramConfiguration pr
 	tip->next = newprogramlist;
 	return programlist;
 }
+
+void freeprogramlist(ProgramList* programlist) {
+	while(programlist != NULL) {
+		ProgramList *tmp = programlist;
+		programlist = programlist->next;
+		free(tmp);
+	}
+}

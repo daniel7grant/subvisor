@@ -39,6 +39,8 @@ int main(int argc, char **argv)
 		if (access(arguments.configurationfile, R_OK))
 		{
 			// TODO: print to the console
+			free(configurationfile);
+			freearguments(arguments);
 			return 1;
 		}
 		strcpy(configurationfile, arguments.configurationfile);
@@ -52,17 +54,24 @@ int main(int argc, char **argv)
 		}
 		if (i >= length)
 		{
+			free(configurationfile);
+			freearguments(arguments);
 			return 1;
 		}
 		strcpy(configurationfile, defaultconfigurationfiles[i]);
 	}
+
 	Configuration *configuration = readfromfile(configurationfile, arguments.configurationlist);
+
+	free(configurationfile);
+	freearguments(arguments);
+
 	if (!configuration)
 	{
 		return 1;
 	}
 
-	freearguments(arguments);
+	freeconfiguration(configuration);
 
 	return 0;
 }
