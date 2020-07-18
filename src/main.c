@@ -27,47 +27,26 @@ const char *defaultconfigurationfiles[] = {
 int main(int argc, char **argv)
 {
 	struct arguments arguments;
-	arguments.configurationfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
-	memset(arguments.configurationfile, 0, MAX_LINE_LENGTH * sizeof(char));
+	arguments.configurationfile = NULL;
 	memset(arguments.configurationlist, 0, MAX_ARGUMENTS * sizeof(char *));
 	arguments.verbosity = 0;
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
-	char *configurationfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
-	if (strlen(arguments.configurationfile) > 0)
+	const char *configurationfile = checkfiles(arguments.configurationfile, defaultconfigurationfiles,
+											   sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]));
+	if (configurationfile == NULL)
 	{
-		if (access(arguments.configurationfile, R_OK))
-		{
-			// TODO: print to the console
-			free(configurationfile);
-			freearguments(arguments);
-			return 1;
-		}
-		strcpy(configurationfile, arguments.configurationfile);
-	}
-	else
-	{
-		int i = 0, length = sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[i]);
-		while (access(defaultconfigurationfiles[i], R_OK) && i < length)
-		{
-			++i;
-		}
-		if (i >= length)
-		{
-			free(configurationfile);
-			freearguments(arguments);
-			return 1;
-		}
-		strcpy(configurationfile, defaultconfigurationfiles[i]);
+		// TODO: print message
+		freearguments(arguments);
+		return 1;
 	}
 
 	Configuration *configuration = readfromfile(configurationfile, arguments.configurationlist);
-
-	free(configurationfile);
 	freearguments(arguments);
 
 	if (!configuration)
 	{
+		// TODO: print message
 		return 1;
 	}
 

@@ -368,13 +368,13 @@ int parseline(char *line, char *pair[2])
 		++i;
 	}
 	line[end + 1] = '\0';
-	
+
 	pair[0] = &line[key];
 	pair[1] = &line[value];
 	return 0;
 }
 
-Configuration *readfromfile(char *filename, char **arguments)
+Configuration *readfromfile(const char *filename, char **arguments)
 {
 	FILE *conffile = fopen(filename, "r");
 	if (conffile == NULL)
@@ -443,7 +443,32 @@ Configuration *readfromfile(char *filename, char **arguments)
 	return configuration;
 }
 
-extern void freeconfiguration(Configuration* configuration){
+const char *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
+{
+	if (configurationfile != NULL)
+	{
+		if (access(configurationfile, R_OK) == 0)
+		{
+			return configurationfile;
+		}
+	}
+	else
+	{
+		int i = 0;
+		while (access(defaultconfigurationfiles[i], R_OK) != 0 && i < length)
+		{
+			++i;
+		}
+		if (i < length)
+		{
+			return defaultconfigurationfiles[i];
+		}
+	}
+	return NULL;
+}
+
+void freeconfiguration(Configuration *configuration)
+{
 	freeprogramlist(configuration->programs);
 	free(configuration);
 }

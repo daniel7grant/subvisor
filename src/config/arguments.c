@@ -22,6 +22,7 @@ error_t parse_opt(int key, char *arg, struct argp_state *state)
 		arguments->verbosity = 1;
 		break;
 	case 'c':
+		arguments->configurationfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 		strcpy(arguments->configurationfile, arg);
 		break;
 	case 'n':
@@ -84,7 +85,10 @@ error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 void freearguments(struct arguments arguments)
 {
-	free(arguments.configurationfile);
+	if (arguments.configurationfile != NULL)
+	{
+		free(arguments.configurationfile);
+	}
 	for (int i = 0; arguments.configurationlist[i] != NULL; ++i)
 	{
 		free(arguments.configurationlist[i]);
