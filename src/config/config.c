@@ -374,14 +374,8 @@ int parseline(char *line, char *pair[2])
 	return 0;
 }
 
-Configuration *readfromfile(const char *filename, char **arguments)
+Configuration *readfromfile(FILE* conffile, char **arguments)
 {
-	FILE *conffile = fopen(filename, "r");
-	if (conffile == NULL)
-	{
-		return NULL;
-	}
-
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 	configuration->programs = NULL;
 
@@ -438,33 +432,26 @@ Configuration *readfromfile(const char *filename, char **arguments)
 
 	free(block);
 	free(line);
-	fclose(conffile);
 
 	return configuration;
 }
 
-const char *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
+FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
 {
+	FILE* file = NULL;
 	if (configurationfile != NULL)
 	{
-		if (access(configurationfile, R_OK) == 0)
-		{
-			return configurationfile;
-		}
+		file = fopen(configurationfile, "r");
 	}
 	else
 	{
 		int i = 0;
-		while (access(defaultconfigurationfiles[i], R_OK) != 0 && i < length)
+		while (i < length && (file = fopen(defaultconfigurationfiles[i], "r")) == NULL)
 		{
 			++i;
 		}
-		if (i < length)
-		{
-			return defaultconfigurationfiles[i];
-		}
 	}
-	return NULL;
+	return file;
 }
 
 void freeconfiguration(Configuration *configuration)

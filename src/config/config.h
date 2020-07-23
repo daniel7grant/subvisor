@@ -16,8 +16,8 @@ typedef struct Configuration
 	ProgramList *programs;
 } Configuration;
 
-extern Configuration *readfromfile(const char *filename, char **arguments);
-extern const char *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
+extern Configuration *readfromfile(FILE *filename, char **arguments);
+extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern void freeconfiguration(Configuration* configuration);
 
 #endif
