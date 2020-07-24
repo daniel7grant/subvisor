@@ -59,6 +59,8 @@ int main(int argc, char **argv)
 	freearguments(arguments);
 	fclose(configurationfile);
 
+	const char *error = validateconfiguration();
+
 	if (!configuration)
 	{
 		// TODO: print message
