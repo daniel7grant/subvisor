@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define MAX_LINE_LENGTH 1024
 
 #include "baseconfig.h"
 #include "programconfig.h"
+
+extern char *arg0;
 
 typedef struct Configuration
 {
@@ -16,7 +19,9 @@ typedef struct Configuration
 	ProgramList *programs;
 } Configuration;
 
+extern void usage(const char *format, ...);
 extern Configuration *readfromfile(FILE *filename, char **arguments);
+extern int validateconfiguration(Configuration *configuration);
 extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern void freeconfiguration(Configuration* configuration);
 

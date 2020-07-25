@@ -10,7 +10,7 @@ const char *argp_program_bug_address = "<bugs@dgrn.tk>";
 const struct argp argp = {options, parse_opt, 0, "subvisord -- run a set of applications as daemons.", 0, 0, 0};
 
 #if defined(_WIN32) || defined(WIN32)
-const char* defaultconfigurationfiles[] = {
+const char *defaultconfigurationfiles[] = {
 	"../etc/subvisord.conf",
 	"../etc/supervisord.conf",
 	"../subvisord.conf",
@@ -21,7 +21,7 @@ const char* defaultconfigurationfiles[] = {
 	"./etc/supervisord.conf",
 };
 #else
-const char* defaultconfigurationfiles[] = {
+const char *defaultconfigurationfiles[] = {
 	"../etc/subvisord.conf",
 	"../etc/supervisord.conf",
 	"../subvisord.conf",
@@ -45,29 +45,39 @@ int main(int argc, char **argv)
 	arguments.verbosity = 0;
 	argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
+	arg0 = argv[0];
+
 	FILE *configurationfile = checkfiles(arguments.configurationfile, defaultconfigurationfiles,
-											   sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]));
+										 sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]));
 	if (configurationfile == NULL)
 	{
-		// TODO: print message
+		if (arguments.configurationfile != NULL)
+		{
+			usage("could not find config file %s.", arguments.configurationfile);
+		}
+		else
+		{
+			usage("could not find config file.");
+		}
 		freearguments(arguments);
-		fclose(configurationfile);
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	Configuration *configuration = readfromfile(configurationfile, arguments.configurationlist);
 	freearguments(arguments);
 	fclose(configurationfile);
 
-	const char *error = validateconfiguration();
-
 	if (!configuration)
 	{
-		// TODO: print message
-		return 1;
+		return EXIT_FAILURE;
+	}
+
+	if (validateconfiguration(configuration) != 0)
+	{
+		return EXIT_FAILURE;
 	}
 
 	freeconfiguration(configuration);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

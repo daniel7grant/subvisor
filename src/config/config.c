@@ -1,5 +1,7 @@
 #include "config.h"
 
+char *arg0 = "";
+
 int endofline(char c)
 {
 	return c == '\0' || c == '\r' || c == '\n' || c == '#' || c == ';';
@@ -86,65 +88,69 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		{
 			strcpy(configuration->baseconfiguration.pidfile, value);
 		}
-		if (strcmp(key, "nodaemon") == 0)
+		else if (strcmp(key, "nodaemon") == 0)
 		{
 			configuration->baseconfiguration.nodaemon = toboolean(value);
 		}
-		if (strcmp(key, "minfds") == 0)
+		else if (strcmp(key, "minfds") == 0)
 		{
 			configuration->baseconfiguration.minfds = atoi(value);
 		}
-		if (strcmp(key, "minprocs") == 0)
+		else if (strcmp(key, "minprocs") == 0)
 		{
 			configuration->baseconfiguration.minprocs = atoi(value);
 		}
-		if (strcmp(key, "umask") == 0)
+		else if (strcmp(key, "umask") == 0)
 		{
 			configuration->baseconfiguration.umask = strtol(value, NULL, 8);
 		}
-		if (strcmp(key, "user") == 0)
+		else if (strcmp(key, "user") == 0)
 		{
 			strcpy(configuration->baseconfiguration.user, value);
 		}
-		if (strcmp(key, "directory") == 0)
+		else if (strcmp(key, "directory") == 0)
 		{
 			strcpy(configuration->baseconfiguration.directory, value);
 		}
-		if (strcmp(key, "strip_ansi") == 0)
+		else if (strcmp(key, "strip_ansi") == 0)
 		{
 			configuration->baseconfiguration.strip_ansi = toboolean(value);
 		}
-		if (strcmp(key, "identifier") == 0)
+		else if (strcmp(key, "identifier") == 0)
 		{
 			strcpy(configuration->baseconfiguration.identifier, value);
 		}
-		if (strcmp(key, "environment") == 0)
+		else if (strcmp(key, "environment") == 0)
 		{
 			strcpy(configuration->baseconfiguration.environment, value);
 		}
-		if (strcmp(key, "nocleanup") == 0)
+		else if (strcmp(key, "nocleanup") == 0)
 		{
 			configuration->baseconfiguration.nocleanup = toboolean(value);
 		}
-		if (strcmp(key, "childlogdir") == 0)
+		else if (strcmp(key, "childlogdir") == 0)
 		{
 			strcpy(configuration->baseconfiguration.childlogdir, value);
 		}
-		if (strcmp(key, "logfile") == 0)
+		else if (strcmp(key, "logfile") == 0)
 		{
 			strcpy(configuration->baseconfiguration.log.logfile, value);
 		}
-		if (strcmp(key, "logfile_maxbytes") == 0)
+		else if (strcmp(key, "logfile_maxbytes") == 0)
 		{
 			configuration->baseconfiguration.log.logfile_maxbytes = tobyte(value);
 		}
-		if (strcmp(key, "loglevel") == 0)
+		else if (strcmp(key, "loglevel") == 0)
 		{
 			configuration->baseconfiguration.log.loglevel = tologlevel(value);
 		}
-		if (strcmp(key, "logfile_backups") == 0)
+		else if (strcmp(key, "logfile_backups") == 0)
 		{
 			configuration->baseconfiguration.log.logfile_backups = atoi(value);
+		}
+		else
+		{
+			return 1;
 		}
 	}
 	else if (strcmp(block, "include") == 0)
@@ -158,140 +164,145 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		{
 			strcpy(programlist->program.command, value);
 		}
-		if (strcmp(key, "process_name") == 0)
+		else if (strcmp(key, "process_name") == 0)
 		{
 			strcpy(programlist->program.process_name, value);
 		}
-		if (strcmp(key, "numprocs") == 0)
+		else if (strcmp(key, "numprocs") == 0)
 		{
 			programlist->program.numprocs = atoi(value);
 		}
-		if (strcmp(key, "numprocs_start") == 0)
+		else if (strcmp(key, "numprocs_start") == 0)
 		{
 			programlist->program.numprocs_start = atoi(value);
 		}
-		if (strcmp(key, "umask") == 0)
+		else if (strcmp(key, "umask") == 0)
 		{
 			programlist->program.umask = strtol(value, NULL, 8);
 		}
-		if (strcmp(key, "priority") == 0)
+		else if (strcmp(key, "priority") == 0)
 		{
 			programlist->program.priority = atoi(value);
 		}
-		if (strcmp(key, "autostart") == 0)
+		else if (strcmp(key, "autostart") == 0)
 		{
 			programlist->program.autostart = toboolean(value);
 		}
-		if (strcmp(key, "autorestart") == 0)
+		else if (strcmp(key, "autorestart") == 0)
 		{
 			programlist->program.autorestart = autorestart(value);
 		}
-		if (strcmp(key, "startsecs") == 0)
+		else if (strcmp(key, "startsecs") == 0)
 		{
 			programlist->program.startsecs = atoi(value);
 		}
-		if (strcmp(key, "startretries") == 0)
+		else if (strcmp(key, "startretries") == 0)
 		{
 			programlist->program.startretries = atoi(value);
 		}
-		if (strcmp(key, "exitcodes") == 0)
+		else if (strcmp(key, "exitcodes") == 0)
 		{
 			programlist->program.exitcodes = toexitcode(value);
 		}
-		if (strcmp(key, "stopsignal") == 0)
+		else if (strcmp(key, "stopsignal") == 0)
 		{
 			programlist->program.stopsignal = atoi(value);
 		}
-		if (strcmp(key, "stopwaitsecs") == 0)
+		else if (strcmp(key, "stopwaitsecs") == 0)
 		{
 			programlist->program.stopwaitsecs = atoi(value);
 		}
-		if (strcmp(key, "stopasgroup") == 0)
+		else if (strcmp(key, "stopasgroup") == 0)
 		{
 			programlist->program.stopasgroup = toboolean(value);
 		}
-		if (strcmp(key, "killasgroup") == 0)
+		else if (strcmp(key, "killasgroup") == 0)
 		{
 			programlist->program.killasgroup = toboolean(value);
 		}
-		if (strcmp(key, "redirect_stderr") == 0)
+		else if (strcmp(key, "redirect_stderr") == 0)
 		{
 			programlist->program.redirect_stderr = toboolean(value);
 		}
-		if (strcmp(key, "user") == 0)
+		else if (strcmp(key, "user") == 0)
 		{
 			strcpy(programlist->program.user, value);
 		}
-		if (strcmp(key, "directory") == 0)
+		else if (strcmp(key, "directory") == 0)
 		{
 			strcpy(programlist->program.directory, value);
 		}
-		if (strcmp(key, "environment") == 0)
+		else if (strcmp(key, "environment") == 0)
 		{
 			strcpy(programlist->program.environment, value);
 		}
-		if (strcmp(key, "stdout_logfile") == 0)
+		else if (strcmp(key, "stdout_logfile") == 0)
 		{
 			strcpy(programlist->program.stdout_log.logfile, value);
 		}
-		if (strcmp(key, "stdout_logfile_maxbytes") == 0)
+		else if (strcmp(key, "stdout_logfile_maxbytes") == 0)
 		{
 			programlist->program.stdout_log.logfile_maxbytes = tobyte(value);
 		}
-		if (strcmp(key, "stdout_logfile_backups") == 0)
+		else if (strcmp(key, "stdout_logfile_backups") == 0)
 		{
 			programlist->program.stdout_log.logfile_backups = atoi(value);
 		}
-		if (strcmp(key, "stdout_capture_maxbytes") == 0)
+		else if (strcmp(key, "stdout_capture_maxbytes") == 0)
 		{
 			programlist->program.stdout_log.capture_maxbytes = tobyte(value);
 		}
-		if (strcmp(key, "stdout_syslog") == 0)
+		else if (strcmp(key, "stdout_syslog") == 0)
 		{
 			programlist->program.stdout_log.syslog = toboolean(value);
 		}
-		if (strcmp(key, "stdout_events_enabled") == 0)
+		else if (strcmp(key, "stdout_events_enabled") == 0)
 		{
 			programlist->program.stdout_log.events_enabled = toboolean(value);
 		}
-		if (strcmp(key, "stderr_logfile") == 0)
+		else if (strcmp(key, "stderr_logfile") == 0)
 		{
 			strcpy(programlist->program.stderr_log.logfile, value);
 		}
-		if (strcmp(key, "stderr_logfile_maxbytes") == 0)
+		else if (strcmp(key, "stderr_logfile_maxbytes") == 0)
 		{
 			programlist->program.stderr_log.logfile_maxbytes = tobyte(value);
 		}
-		if (strcmp(key, "stderr_logfile_backups") == 0)
+		else if (strcmp(key, "stderr_logfile_backups") == 0)
 		{
 			programlist->program.stderr_log.logfile_backups = atoi(value);
 		}
-		if (strcmp(key, "stderr_capture_maxbytes") == 0)
+		else if (strcmp(key, "stderr_capture_maxbytes") == 0)
 		{
 			programlist->program.stderr_log.capture_maxbytes = tobyte(value);
 		}
-		if (strcmp(key, "stderr_syslog") == 0)
+		else if (strcmp(key, "stderr_syslog") == 0)
 		{
 			programlist->program.stderr_log.syslog = toboolean(value);
 		}
-		if (strcmp(key, "stderr_events_enabled") == 0)
+		else if (strcmp(key, "stderr_events_enabled") == 0)
 		{
 			programlist->program.stderr_log.events_enabled = toboolean(value);
 		}
-	}
-	else if (strncmp(block, "group", strlen("group")) == 0)
-	{
-		// TODO
+		else
+		{
+			return 1;
+		}
 	}
 	else if (strncmp(block, "fcgi-program", strlen("fcgi-program")) == 0 ||
 			 strncmp(block, "eventlistener", strlen("eventlistener")) == 0 ||
 			 strncmp(block, "rpcinterface", strlen("rpcinterface")) == 0)
 	{
 		// MIGHT HAPPEN
+		// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
 	}
-	else if (strcmp(block, "unix_http_server") == 0 || strcmp(block, "unix_http_server") == 0 || strcmp(block, "supervisorctl") == 0)
+	else if (strncmp(block, "group", strlen("group") == 0) ||
+			 strcmp(block, "unix_http_server") == 0 ||
+			 strcmp(block, "unix_http_server") == 0 ||
+			 strcmp(block, "supervisorctl") == 0)
 	{
-		// WARNING: WILL NOT WORK
+		// TODO: WARNING: WILL NOT WORK
+		// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
 	}
 	else
 	{
@@ -374,36 +385,54 @@ int parseline(char *line, char *pair[2])
 	return 0;
 }
 
-Configuration *readfromfile(FILE* conffile, char **arguments)
+void usage(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	char *error = malloc(MAX_LINE_LENGTH * sizeof(char));
+	memset(error, 0, MAX_LINE_LENGTH);
+	vsprintf(error, format, args);
+	va_end(args);
+	fprintf(stderr, "Error: %s\nFor help, use %s -h\n", error, arg0);
+	free(error);
+}
+
+Configuration *readfromfile(FILE *conffile, char **arguments)
 {
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 	configuration->programs = NULL;
 
+	int parsing_error = 0;
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+	int linenumber = 0;
+	char *pair[2];
 	while (fgets(line, MAX_LINE_LENGTH, conffile) != NULL)
 	{
-		char *pair[2];
-		if (parseline(line, pair))
-		{
-			// CONFIGURATION FAILED
-			free(block);
-			free(line);
-			fclose(conffile);
-			return NULL;
-		}
+		parsing_error |= parseline(line, pair);
 
 		if (pair[0] != 0 && pair[1] == 0)
 		{
 			// CREATE NEW BLOCK
 			strcpy(block, pair[0]);
-			initializeblock(configuration, block);
+			parsing_error |= initializeblock(configuration, block);
 		}
 		else if (pair[0] != 0 && pair[1] != 0)
 		{
 			// ADD NEW KEY-VALUE PAIR
-			setconfigvariable(configuration, block, pair[0], pair[1]);
+			parsing_error |= setconfigvariable(configuration, block, pair[0], pair[1]);
 		}
+
+		if (parsing_error)
+		{
+			// PARSING FAILED
+			usage("configuration file contains parsing errors:\n\t[line %d]: %s = %s", linenumber, pair[0], pair[1]);
+			free(block);
+			free(line);
+			return NULL;
+		}
+
+		++linenumber;
 	}
 
 	// MERGE WITH ARGUMENTS FROM THE COMMAND LINE
@@ -416,9 +445,9 @@ Configuration *readfromfile(FILE* conffile, char **arguments)
 		if (parseline(line, pair))
 		{
 			// CONFIGURATION FAILED
+			usage("command line configuration failed:\n\t[line %d]: %s", linenumber, line);
 			free(block);
 			free(line);
-			fclose(conffile);
 			return NULL;
 		}
 
@@ -436,9 +465,14 @@ Configuration *readfromfile(FILE* conffile, char **arguments)
 	return configuration;
 }
 
+int validateconfiguration(Configuration *configuration)
+{
+	return 0;
+}
+
 FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
 {
-	FILE* file = NULL;
+	FILE *file = NULL;
 	if (configurationfile != NULL)
 	{
 		file = fopen(configurationfile, "r");
