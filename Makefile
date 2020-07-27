@@ -12,14 +12,11 @@ build/config: build
 build/logger: build
 	mkdir -p build/logger
 
-build/subvisord: build src/subvisord.c build/config/arguments.o build/config/baseconfig.o build/config/config.o build/config/programconfig.o build/logger/logger.o build/utils.o
-	$(CC) $(CFLAGS) $(LDFLAGS) -o build/subvisord src/subvisord.c build/config/arguments.o build/config/baseconfig.o build/config/config.o build/config/programconfig.o build/logger/logger.o build/utils.o
+build/subvisord: build src/subvisord.c build/config/arguments.o build/config/config.o build/config/programconfig.o build/logger/logger.o build/utils.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o build/subvisord src/subvisord.c build/config/arguments.o build/config/config.o build/config/programconfig.o build/logger/logger.o build/utils.o
 
 build/config/arguments.o: build/config src/config/arguments.c
 	$(CC) $(CFLAGS) -c -o build/config/arguments.o src/config/arguments.c
-
-build/config/baseconfig.o: build/config src/config/baseconfig.c
-	$(CC) $(CFLAGS) -c -o build/config/baseconfig.o src/config/baseconfig.c
 
 build/config/config.o: build/config src/config/config.c
 	$(CC) $(CFLAGS) -c -o build/config/config.o src/config/config.c

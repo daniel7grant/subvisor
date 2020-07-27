@@ -3,16 +3,28 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAX_LINE_LENGTH 1024
 
 #include "../utils.h"
-#include "baseconfig.h"
 #include "programconfig.h"
 
 typedef struct Configuration
 {
-	BaseConfiguration baseconfiguration;
+	Logger log;
+	char pidfile[MAX_LINE_LENGTH];
+	int nodaemon;
+	int minfds;
+	int minprocs;
+	int umask;
+	char user[MAX_LINE_LENGTH];
+	char identifier[MAX_LINE_LENGTH];
+	char directory[MAX_LINE_LENGTH];
+	int nocleanup;
+	char childlogdir[MAX_LINE_LENGTH];
+	int strip_ansi;
+	char environment[MAX_LINE_LENGTH];
 	ProgramList *programs;
 } Configuration;
 

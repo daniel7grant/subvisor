@@ -47,7 +47,34 @@ int initializeblock(Configuration *configuration, char *block)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
-		configuration->baseconfiguration = createdefaultbaseconfig();
+		char *cwd = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+		getcwd(cwd, MAX_LINE_LENGTH);
+
+		strcpy(configuration->pidfile, cwd);
+		strcat(configuration->pidfile, "/supervisord.pid");
+		configuration->nodaemon = 0;
+		configuration->minfds = 1024;
+		configuration->minprocs = 200;
+		configuration->umask = 0220;
+		strcpy(configuration->user, "");
+		strcpy(configuration->directory, "");
+		configuration->strip_ansi = 0;
+		strcpy(configuration->identifier, "subvisor");
+		strcpy(configuration->environment, "");
+		configuration->nocleanup = 0;
+		// TODO: strcpy(configuration->childlogdir, getenv("TMPDIR"));
+
+		char *logfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+		strcpy(logfile, cwd);
+		strcat(logfile, "/supervisord.log");
+
+		Logger log = createlogger(logfile);
+		log.loglevel = 2;
+
+		configuration->log = log;
+
+		free(logfile);
+		free(cwd);
 	}
 	else if (strcmp(block, "include") == 0)
 	{
@@ -57,19 +84,19 @@ int initializeblock(Configuration *configuration, char *block)
 	{
 		configuration->programs = pushtoprogramlist(configuration->programs, createdefaultprogramconfig());
 	}
-	else if (strncmp(block, "group", strlen("group")) == 0)
-	{
-		// TODO
-	}
 	else if (strncmp(block, "fcgi-program", strlen("fcgi-program")) == 0 ||
 			 strncmp(block, "eventlistener", strlen("eventlistener")) == 0 ||
 			 strncmp(block, "rpcinterface", strlen("rpcinterface")) == 0)
 	{
 		// MIGHT HAPPEN
 	}
-	else if (strcmp(block, "unix_http_server") == 0 || strcmp(block, "unix_http_server") == 0 || strcmp(block, "supervisorctl") == 0)
+	else if (strncmp(block, "group", strlen("group")) == 0 ||
+			 strcmp(block, "unix_http_server") == 0 ||
+			 strcmp(block, "inet_http_server") == 0 ||
+			 strcmp(block, "supervisorctl") == 0)
 	{
-		// WARNING: WILL NOT WORK
+		// TODO: WARNING: WILL NOT WORK
+		// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
 	}
 	else
 	{
@@ -84,67 +111,67 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 	{
 		if (strcmp(key, "pidfile") == 0)
 		{
-			strcpy(configuration->baseconfiguration.pidfile, value);
+			strcpy(configuration->pidfile, value);
 		}
 		else if (strcmp(key, "nodaemon") == 0)
 		{
-			configuration->baseconfiguration.nodaemon = toboolean(value);
+			configuration->nodaemon = toboolean(value);
 		}
 		else if (strcmp(key, "minfds") == 0)
 		{
-			configuration->baseconfiguration.minfds = atoi(value);
+			configuration->minfds = atoi(value);
 		}
 		else if (strcmp(key, "minprocs") == 0)
 		{
-			configuration->baseconfiguration.minprocs = atoi(value);
+			configuration->minprocs = atoi(value);
 		}
 		else if (strcmp(key, "umask") == 0)
 		{
-			configuration->baseconfiguration.umask = strtol(value, NULL, 8);
+			configuration->umask = strtol(value, NULL, 8);
 		}
 		else if (strcmp(key, "user") == 0)
 		{
-			strcpy(configuration->baseconfiguration.user, value);
+			strcpy(configuration->user, value);
 		}
 		else if (strcmp(key, "directory") == 0)
 		{
-			strcpy(configuration->baseconfiguration.directory, value);
+			strcpy(configuration->directory, value);
 		}
 		else if (strcmp(key, "strip_ansi") == 0)
 		{
-			configuration->baseconfiguration.strip_ansi = toboolean(value);
+			configuration->strip_ansi = toboolean(value);
 		}
 		else if (strcmp(key, "identifier") == 0)
 		{
-			strcpy(configuration->baseconfiguration.identifier, value);
+			strcpy(configuration->identifier, value);
 		}
 		else if (strcmp(key, "environment") == 0)
 		{
-			strcpy(configuration->baseconfiguration.environment, value);
+			strcpy(configuration->environment, value);
 		}
 		else if (strcmp(key, "nocleanup") == 0)
 		{
-			configuration->baseconfiguration.nocleanup = toboolean(value);
+			configuration->nocleanup = toboolean(value);
 		}
 		else if (strcmp(key, "childlogdir") == 0)
 		{
-			strcpy(configuration->baseconfiguration.childlogdir, value);
+			strcpy(configuration->childlogdir, value);
 		}
 		else if (strcmp(key, "logfile") == 0)
 		{
-			strcpy(configuration->baseconfiguration.log.logfile, value);
+			strcpy(configuration->log.logfile, value);
 		}
 		else if (strcmp(key, "logfile_maxbytes") == 0)
 		{
-			configuration->baseconfiguration.log.logfile_maxbytes = tobyte(value);
+			configuration->log.logfile_maxbytes = tobyte(value);
 		}
 		else if (strcmp(key, "loglevel") == 0)
 		{
-			configuration->baseconfiguration.log.loglevel = tologlevel(value);
+			configuration->log.loglevel = tologlevel(value);
 		}
 		else if (strcmp(key, "logfile_backups") == 0)
 		{
-			configuration->baseconfiguration.log.logfile_backups = atoi(value);
+			configuration->log.logfile_backups = atoi(value);
 		}
 		else
 		{
@@ -299,12 +326,12 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		// MIGHT HAPPEN
 		// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
 	}
-	else if (strncmp(block, "group", strlen("group") == 0) ||
+	else if (strncmp(block, "group", strlen("group")) == 0 ||
 			 strcmp(block, "unix_http_server") == 0 ||
-			 strcmp(block, "unix_http_server") == 0 ||
+			 strcmp(block, "inet_http_server") == 0 ||
 			 strcmp(block, "supervisorctl") == 0)
 	{
-		// TODO: WARNING: WILL NOT WORK
+		// WILL NOT WORK
 		// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
 	}
 	else
