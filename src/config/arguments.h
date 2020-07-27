@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "../utils.h"
+
 #define SUBVISORD_VERSION "0.0.0"
 #define MAX_ARGUMENTS 100
 #define MAX_LINE_LENGTH 1024
@@ -22,7 +24,6 @@ typedef struct ParsedArguments {
 	int verbosity;
 } ParsedArguments;
 
-extern char *arg0;
 extern const Option options[];
 
 int parsearguments(ParsedArguments* arguments, int argc, char *argv[]);

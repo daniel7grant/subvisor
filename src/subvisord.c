@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "utils.h"
 #include "config/arguments.h"
 #include "config/config.h"
 
@@ -41,7 +42,10 @@ int main(int argc, char **argv)
 	arguments.configurationfile = NULL;
 	memset(arguments.configurationlist, 0, MAX_ARGUMENTS * sizeof(char *));
 	arguments.verbosity = 1;
-	parsearguments(&arguments, argc, argv);
+	if (parsearguments(&arguments, argc, argv))
+	{
+		return EXIT_FAILURE;
+	}
 
 	FILE *configurationfile = checkfiles(arguments.configurationfile, defaultconfigurationfiles,
 										 sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]));

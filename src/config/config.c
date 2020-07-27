@@ -1,7 +1,5 @@
 #include "config.h"
 
-char *arg0 = "";
-
 int endofline(char c)
 {
 	return c == '\0' || c == '\r' || c == '\n' || c == '#' || c == ';';
@@ -388,18 +386,6 @@ int parseline(char *line, char *pair[2])
 	pair[0] = &line[key];
 	pair[1] = &line[value];
 	return 0;
-}
-
-void usage(const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	char *error = malloc(MAX_LINE_LENGTH * sizeof(char));
-	memset(error, 0, MAX_LINE_LENGTH);
-	vsprintf(error, format, args);
-	va_end(args);
-	fprintf(stderr, "Error: %s\nFor help, use %s -h\n", error, arg0);
-	free(error);
 }
 
 Configuration *readfromfile(FILE *conffile, char **arguments)

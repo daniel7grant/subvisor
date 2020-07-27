@@ -130,7 +130,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 				if (strlen(current) == 2)
 				{
 					// end of arguments
-					return 0;
+					return EXIT_SUCCESS;
 				}
 				next = strchr(current, '=');
 				if (next != NULL)
@@ -143,14 +143,16 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 				Option opt = findoptlong(&(current[2]));
 				if (opt.name == NULL)
 				{
-					return 2;
+					usage("option %s not recognized", current);
+					return EXIT_FAILURE;
 				}
 				if (opt.args != NULL)
 				{
 					// argument after option
 					if (next == NULL)
 					{
-						return 2;
+						usage("option %s requires argument", current);
+						return EXIT_FAILURE;
 					}
 					handleoption(arguments, opt, next);
 					// skip argument
@@ -170,7 +172,8 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 					Option opt = findoptshort(current[j]);
 					if (opt.key != current[j])
 					{
-						return 2;
+						usage("option %s not recognized", current);
+						return EXIT_FAILURE;
 					}
 					if (opt.args == NULL)
 					{
@@ -188,7 +191,8 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 						// argument after option
 						if (next == NULL)
 						{
-							return 2;
+							usage("option %s requires argument", current);
+							return EXIT_FAILURE;
 						}
 						// skip argument
 						++i;
@@ -200,11 +204,12 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 		}
 		else
 		{
+			usage("positional arguments are not supported: %s", current);
 			// We can use that our program should not have arguments
 			return 1;
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 void freearguments(ParsedArguments arguments)
