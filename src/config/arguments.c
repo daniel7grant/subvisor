@@ -1,107 +1,213 @@
 #include "arguments.h"
 
-const struct argp_option options[] = {
-	{"configuration", 'c', "FILENAME", 0, "configuration file path (searches if not given)", 0},
-	{"nodaemon", 'n', 0, 0, "run in the foreground (same as 'nodaemon=true' in config file)", 0},
-	{"silent", 's', 0, 0, "no logs to stdout (maps to 'silent=true' in config file)", 0},
-	{"user", 'u', "USER", 0, "run supervisord as this user (or numeric uid)", 0},
-	{"umask", 'm', "UMASK", 0, "use this umask for daemon subprocess (default is 022)", 0},
-	{"directory", 'd', "DIR", 0, "directory to chdir to when daemonized", 0},
-	{"logfile", 'l', "FILENAME", 0, "use FILENAME as logfile path", 0},
-	{"logfile_maxbytes", 'y', "BYTES", 0, "use BYTES to limit the max size of logfile", 0},
-	{"logfile_backups", 'z', "NUM", 0, "number of backups to keep when max bytes reached", 0},
-	{"loglevel", 'e', "LEVEL", 0, "use LEVEL as log level (debug,info,warn,error,critical)", 0},
-	{"pidfile", 'j', "FILENAME", 0, "write a pid file for the daemon process to FILENAME", 0},
-	{"identifier", 'i', "STR", 0, "identifier used for this instance of supervisord", 0},
-	{"childlogdir", 'q', "DIR", 0, "the log directory for child process logs", 0},
-	{"nocleanup", 'k', 0, 0, "prevent the process from performing cleanup (removal of old automatic child log files) at startup.", 0},
-	{"minfds", 'a', "NUM", 0, "the minimum number of file descriptors for start success", 0},
-	{"strip_ansi", 't', 0, 0, "strip ansi escape codes from process output", 0},
-	{"minprocs", 0, "NUM", 0, "the minimum number of processes available for start success", 0},
-	{"profile_options", 0, "OPTS", 0, "run supervisord under profiler and output results based on OPTIONS, which  is a comma-sep'd list of 'cumulative', 'calls', and/or 'callers', e.g. 'cumulative,callers')", 0},
-	{0}};
+const Option options[] = {
+	{"minfds", 'a', "NUM", "the minimum number of file descriptors for start success"},
+	{"configuration", 'c', "FILENAME", "configuration file path (searches if not given)"},
+	{"directory", 'd', "DIR", "directory to chdir to when daemonized"},
+	{"loglevel", 'e', "LEVEL", "use LEVEL as log level (debug,info,warn,error,critical)"},
+	{"identifier", 'i', "STR", "identifier used for this instance of supervisord"},
+	{"pidfile", 'j', "FILENAME", "write a pid file for the daemon process to FILENAME"},
+	{"nocleanup", 'k', 0, "prevent the process from performing cleanup (removal of old automatic child log files) at startup."},
+	{"logfile", 'l', "FILENAME", "use FILENAME as logfile path"},
+	{"logfile_maxbytes", 'y', "BYTES", "use BYTES to limit the max size of logfile"},
+	{"logfile_backups", 'z', "NUM", "number of backups to keep when max bytes reached"},
+	{"umask", 'm', "UMASK", "use this umask for daemon subprocess (default is 022)"},
+	{"nodaemon", 'n', 0, "run in the foreground (same as 'nodaemon=true' in config file)"},
+	{"childlogdir", 'q', "DIR", "the log directory for child process logs"},
+	{"silent", 's', 0, "no logs to stdout (maps to 'silent=true' in config file)"},
+	{"strip_ansi", 't', 0, "strip ansi escape codes from process output"},
+	{"user", 'u', "USER", "run supervisord as this user (or numeric uid)"},
+	{"minprocs", 0, "NUM", "the minimum number of processes available for start success"},
+	{"help", 'h', 0, "show this help"},
+	{"version", 'V', 0, "print program version"},
+};
 
-void addtoarguments(char ***arguments, const char *key, char *arg)
+Option nullopt = {0};
+
+Option findoptshort(char key)
 {
-	int i = 0;
-	while ((*arguments)[i])
+	int optlength = sizeof(options) / sizeof(options[0]);
+	for (int i = 0; i < optlength; ++i)
 	{
-		++i;
+		if (options[i].key == key)
+		{
+			return options[i];
+		}
 	}
-	(*arguments)[i] = malloc(MAX_LINE_LENGTH * sizeof(char));
-	sprintf((*arguments)[i], key, arg);
+	return nullopt;
 }
 
-error_t parse_opt(int key, char *arg, struct argp_state *state)
+Option findoptlong(char *name)
 {
-	struct arguments *arguments = (struct arguments *)state->input;
-	char **configurations = arguments->configurationlist;
-
-	switch (key)
+	int optlength = sizeof(options) / sizeof(options[0]);
+	for (int i = 0; i < optlength; ++i)
 	{
+		if (options[i].name && strcmp(options[i].name, name) == 0)
+		{
+			return options[i];
+		}
+	}
+	return nullopt;
+}
+
+void handleoption(ParsedArguments *arguments, Option opt, char *arg)
+{
+	switch (opt.key)
+	{
+	case 'h':
+	{
+		int optlength = sizeof(options) / sizeof(options[0]);
+		printf(
+			"Usage: %s [OPTION...]\n"
+			"Run a set of applications as daemons.\n"
+			"\n"
+			"Options:\n",
+			arg0);
+
+		char *optionstring = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+		memset(optionstring, 0, MAX_LINE_LENGTH);
+		for (int i = 0; i < optlength; ++i)
+		{
+			sprintf(
+				optionstring,
+				"  %s%c%s %s%s%s%s",
+				options[i].key ? "-" : "  ",
+				options[i].key ? options[i].key : ' ',
+				options[i].key && options[i].name ? "," : "",
+				options[i].name ? "--" : "",
+				options[i].name ? options[i].name : "",
+				options[i].name && options[i].args ? "=" : "",
+				options[i].args ? options[i].args : "");
+			printf("%-30s  %s\n", optionstring, options[i].docs);
+		}
+		free(optionstring);
+
+		puts("\nFor more information check out the documentation at https://github.com/daniel7grant/subvisor.");
+		exit(0);
+	}
+	case 'v':
+	{
+		printf("%s\n", SUBVISORD_VERSION);
+		exit(0);
+	}
 	case 'c':
+	{
 		arguments->configurationfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 		strcpy(arguments->configurationfile, arg);
 		break;
-	case 'n':
-		addtoarguments(&configurations, "nodaemon=%s", "true");
-		break;
+	}
 	case 's':
-		arguments->verbosity = -1;
+	{
+		arguments->verbosity = 0;
 		break;
-	case 'u':
-		addtoarguments(&configurations, "user=%s", arg);
-		break;
-	case 'm':
-		addtoarguments(&configurations, "umask=%s", arg);
-		break;
-	case 'd':
-		addtoarguments(&configurations, "directory=%s", arg);
-		break;
-	case 'l':
-		addtoarguments(&configurations, "logfile=%s", arg);
-		break;
-	case 'y':
-		addtoarguments(&configurations, "logfile_maxbytes=%s", arg);
-		break;
-	case 'z':
-		addtoarguments(&configurations, "logfile_backups=%s", arg);
-		break;
-	case 'e':
-		addtoarguments(&configurations, "loglevel=%s", arg);
-		break;
-	case 'j':
-		addtoarguments(&configurations, "pidfile=%s", arg);
-		break;
-	case 'i':
-		addtoarguments(&configurations, "identifier=%s", arg);
-		break;
-	case 'q':
-		addtoarguments(&configurations, "childlogdir=%s", arg);
-		break;
-	case 'k':
-		addtoarguments(&configurations, "nocleanup=%s", "true");
-		break;
-	case 'a':
-		addtoarguments(&configurations, "minfds=%s", arg);
-		break;
-	case 't':
-		addtoarguments(&configurations, "strip_ansi=%s", arg);
-		break;
-		// minprocs
-		// profile_options
-
-	case ARGP_KEY_ARG:
-		break;
-	case ARGP_KEY_END:
-		break;
+	}
 	default:
-		return ARGP_ERR_UNKNOWN;
+	{
+		int i = 0;
+		while (arguments->configurationlist[i])
+		{
+			++i;
+		}
+		arguments->configurationlist[i] = malloc(MAX_LINE_LENGTH * sizeof(char));
+		sprintf(arguments->configurationlist[i], "%s=%s", opt.name, opt.args != NULL ? arg : "true");
+		break;
+	}
+	}
+}
+
+int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
+{
+	char *current, *next;
+	for (int i = 1; i < argc; ++i)
+	{
+		current = argv[i];
+		next = i < argc ? argv[i + 1] : NULL;
+		if (current[0] == '-')
+		{
+			if (current[1] == '-')
+			{
+				// long options
+				if (strlen(current) == 2)
+				{
+					// end of arguments
+					return 0;
+				}
+				next = strchr(current, '=');
+				if (next != NULL)
+				{
+					// argument inside option
+					// set next to the arg
+					(*next) = '\0';
+					++next;
+				}
+				Option opt = findoptlong(&(current[2]));
+				if (opt.name == NULL)
+				{
+					return 2;
+				}
+				if (opt.args != NULL)
+				{
+					// argument after option
+					if (next == NULL)
+					{
+						return 2;
+					}
+					handleoption(arguments, opt, next);
+					// skip argument
+					++i;
+				}
+				else
+				{
+					handleoption(arguments, opt, NULL);
+				}
+			}
+			else
+			{
+				// short options
+				int j = 1;
+				while (current[j] != '\0')
+				{
+					Option opt = findoptshort(current[j]);
+					if (opt.key != current[j])
+					{
+						return 2;
+					}
+					if (opt.args == NULL)
+					{
+						// no arguments
+						handleoption(arguments, opt, NULL);
+					}
+					else if (current[j + 1] != '\0')
+					{
+						// argument inside option
+						handleoption(arguments, opt, &(current[j + 1]));
+						break;
+					}
+					else
+					{
+						// argument after option
+						if (next == NULL)
+						{
+							return 2;
+						}
+						// skip argument
+						++i;
+						handleoption(arguments, opt, next);
+					}
+					++j;
+				}
+			}
+		}
+		else
+		{
+			// We can use that our program should not have arguments
+			return 1;
+		}
 	}
 	return 0;
 }
 
-void freearguments(struct arguments arguments)
+void freearguments(ParsedArguments arguments)
 {
 	if (arguments.configurationfile != NULL)
 	{

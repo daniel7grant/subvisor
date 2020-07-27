@@ -5,10 +5,6 @@
 #include "config/arguments.h"
 #include "config/config.h"
 
-const char *argp_program_version = "argp-ex3 1.0";
-const char *argp_program_bug_address = "<bugs@dgrn.tk>";
-const struct argp argp = {options, parse_opt, 0, "subvisord -- run a set of applications as daemons.", 0, 0, 0};
-
 #if defined(_WIN32) || defined(WIN32)
 const char *defaultconfigurationfiles[] = {
 	"../etc/subvisord.conf",
@@ -39,13 +35,13 @@ const char *defaultconfigurationfiles[] = {
 
 int main(int argc, char **argv)
 {
-	struct arguments arguments;
+	arg0 = argv[0];
+
+	ParsedArguments arguments;
 	arguments.configurationfile = NULL;
 	memset(arguments.configurationlist, 0, MAX_ARGUMENTS * sizeof(char *));
-	arguments.verbosity = 0;
-	argp_parse(&argp, argc, argv, 0, 0, &arguments);
-
-	arg0 = argv[0];
+	arguments.verbosity = 1;
+	parsearguments(&arguments, argc, argv);
 
 	FILE *configurationfile = checkfiles(arguments.configurationfile, defaultconfigurationfiles,
 										 sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]));
@@ -72,8 +68,9 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	if (validateconfiguration(configuration) != 0)
+	if (validateconfiguration(configuration))
 	{
+		freeconfiguration(configuration);
 		return EXIT_FAILURE;
 	}
 
