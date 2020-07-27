@@ -284,6 +284,11 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		{
 			programlist->program.stderr_log.events_enabled = toboolean(value);
 		}
+		else if (strcmp(key, "serverurl") == 0)
+		{
+			// TODO: WARNING: WILL NOT WORK
+			// HOWEVER FAIL SILENTLY TO MAINTAIN COMPATIBILITY
+		}
 		else
 		{
 			return 1;
@@ -467,6 +472,7 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 
 int validateconfiguration(Configuration *configuration)
 {
+
 	return 0;
 }
 
