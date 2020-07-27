@@ -7,8 +7,9 @@
 
 #define MAX_LINE_LENGTH 1024
 
-#include "../utils.h"
 #include "programconfig.h"
+#include "../utils.h"
+#include "../logger/logger.h"
 
 typedef struct Configuration
 {

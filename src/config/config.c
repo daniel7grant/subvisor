@@ -82,7 +82,7 @@ int initializeblock(Configuration *configuration, char *block)
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
 	{
-		configuration->programs = pushtoprogramlist(configuration->programs, createdefaultprogramconfig());
+		configuration->programs = pushtoprogramlist(configuration->programs, createdefaultprogramconfig(block + strlen("progrem") + 1));
 	}
 	else if (strncmp(block, "fcgi-program", strlen("fcgi-program")) == 0 ||
 			 strncmp(block, "eventlistener", strlen("eventlistener")) == 0 ||
@@ -485,8 +485,62 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 
 int validateconfiguration(Configuration *configuration)
 {
+	// TODO: check existence of supervisord block (do we need this?)
+	// usage("%s", ".ini file does not include supervisord section");
 
-	return 0;
+	FILE *pidfile = fopen(configuration->pidfile, "w");
+	if (pidfile == NULL)
+	{
+		usage("could not write pidfile %s", configuration->pidfile);
+		return EXIT_FAILURE;
+	}
+
+	if (openlogger(&configuration->log))
+	{
+		usage("could not write log file %s", configuration->log.logfile);
+		return EXIT_FAILURE;
+	}
+
+	// TODO: check directory access
+	// configuration->childlogdir
+	// configuration->directory
+
+	// TODO: check user existence
+	// emit warning if root
+	// configuration->user
+
+	ProgramList *programlist = configuration->programs;
+	while (programlist != NULL)
+	{
+		ProgramConfiguration program = programlist->program;
+		if (strlen(program.command) == 0)
+		{
+			usage("program section %s does not specify a command", program.process_name);
+			return EXIT_FAILURE;
+		}
+
+		// TODO: check directory access
+		// program.directory
+
+		// TODO: check user existence
+		// program.user
+
+		if (program.numprocs > 1 && strstr(program.process_name, "%(process_num)"))
+		{
+			usage("%s", "%(process_num) must be present within process_name when numprocs > 1");
+			return EXIT_FAILURE;
+		}
+
+		if (program.stopasgroup && !program.killasgroup)
+		{
+			usage("%s", "cannot set stopasgroup=true and killasgroup=false");
+			return EXIT_FAILURE;
+		}
+
+		programlist = programlist->next;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)

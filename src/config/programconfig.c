@@ -1,9 +1,9 @@
 #include "programconfig.h"
 
-ProgramConfiguration createdefaultprogramconfig() {
+ProgramConfiguration createdefaultprogramconfig(char *name) {
 	ProgramConfiguration program;
 	strcpy(program.command, "");
-	strcpy(program.process_name, "");
+	strcpy(program.process_name, name);
 	program.numprocs = 1;
 	program.numprocs_start = 0;
 	program.umask = -1;
