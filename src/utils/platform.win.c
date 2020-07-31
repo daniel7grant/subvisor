@@ -80,6 +80,16 @@ int getprocessid()
 	return _getpid();
 }
 
+FILE *openprocess(char *command)
+{
+	return NULL;
+}
+
+int closeprocess(FILE *pipe)
+{
+	return 0;
+}
+
 int testsyslog()
 {
 	// Windows doesn't support syslog

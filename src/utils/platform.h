@@ -18,5 +18,7 @@ extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
 extern int getprocessid();
 extern int testsyslog();
+extern FILE *openprocess(char *command);
+int closeprocess(FILE *pipe);
 
 #endif

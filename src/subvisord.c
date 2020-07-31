@@ -1,11 +1,14 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #include "utils/utils.h"
 #include "utils/platform.h"
 #include "config/arguments.h"
 #include "config/config.h"
+#include "process/process.h"
 
 int main(int argc, char **argv)
 {
@@ -60,6 +63,28 @@ int main(int argc, char **argv)
 	fclose(pidfile);
 
 	int programscount = countprogramlist(configuration->programs);
+	Process *processes = (Process *)malloc(programscount * sizeof(Process));
+	ProgramList *tip = configuration->programs;
+	for (int i = 0; i < programscount; ++i, tip = tip->next)
+	{
+		processes[i].pid = 0;
+		processes[i].config = tip->program;
+	}
+
+	for (int i = 0; i < programscount; ++i)
+	{
+		processes[i].pipe = openprocess(processes[i].config.command);
+		if (processes[i].pipe == NULL) {
+			printf("%d\n", errno);
+			perror(NULL);
+			fflush(NULL);
+		}
+	}
+
+	for (int i = 0; i < programscount; ++i)
+	{
+		closeprocess(processes[0].pipe);
+	}
 
 	freeconfiguration(configuration);
 	return EXIT_SUCCESS;

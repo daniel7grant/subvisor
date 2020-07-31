@@ -84,6 +84,16 @@ int getprocessid()
 	return getpid();
 }
 
+FILE *openprocess(char *command)
+{
+	return popen(command, "r");
+}
+
+int closeprocess(FILE *pipe)
+{
+	return pclose(pipe);
+}
+
 int testsyslog()
 {
 	return 1;

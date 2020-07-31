@@ -2,6 +2,7 @@
 #define _PLATFORM_WIN_H_INCLUDED_
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <direct.h>
