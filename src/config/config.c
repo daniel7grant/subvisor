@@ -484,12 +484,6 @@ int validateconfiguration(Configuration *configuration)
 	// TODO: check existence of supervisord block (do we need this?)
 	// usage("%s", ".ini file does not include supervisord section");
 
-	if (!checkaccess(configuration->pidfile, 1))
-	{
-		usage("could not write pidfile %s", configuration->pidfile);
-		return EXIT_FAILURE;
-	}
-
 	if (openlogger(&configuration->log))
 	{
 		usage("could not write log file %s", configuration->log.logfile);
@@ -506,7 +500,7 @@ int validateconfiguration(Configuration *configuration)
 		return EXIT_FAILURE;
 	}
 
-	if (!checkuser(configuration->user)) {
+	if (strlen(configuration->user) > 0 && !checkuser(configuration->user)) {
 		usage("user %s does not exist", configuration->user);
 		return EXIT_FAILURE;
 	}
@@ -528,8 +522,8 @@ int validateconfiguration(Configuration *configuration)
 			return EXIT_FAILURE;
 		}
 
-		if (!checkuser(configuration->user)) {
-			usage("user %s does not exist", configuration->user);
+		if (strlen(program.user) > 0 && !checkuser(program.user)) {
+			usage("user %s does not exist", program.user);
 			return EXIT_FAILURE;
 		}
 

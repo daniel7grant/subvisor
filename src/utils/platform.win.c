@@ -75,6 +75,11 @@ const char *gettempdir()
 	return getcurrentdirfile(NULL);
 }
 
+int getprocessid()
+{
+	return _getpid();
+}
+
 int testsyslog()
 {
 	// Windows doesn't support syslog

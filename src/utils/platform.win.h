@@ -6,5 +6,6 @@
 #include <stdlib.h>
 #include <direct.h>
 #include <io.h>
+#include <process.h>
 
 #endif

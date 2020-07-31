@@ -1,6 +1,7 @@
 #include "programconfig.h"
 
-ProgramConfiguration createdefaultprogramconfig(char *name) {
+ProgramConfiguration createdefaultprogramconfig(char *name)
+{
 	ProgramConfiguration program;
 	strcpy(program.command, "");
 	strcpy(program.process_name, name);
@@ -28,9 +29,11 @@ ProgramConfiguration createdefaultprogramconfig(char *name) {
 	return program;
 }
 
-ProgramList *peekprogramlist(ProgramList *programlist) {
+ProgramList *peekprogramlist(ProgramList *programlist)
+{
 	ProgramList *tip = programlist;
-	while (tip->next != NULL) {
+	while (tip->next != NULL)
+	{
 		tip = tip->next;
 	}
 	return tip;
@@ -50,8 +53,22 @@ ProgramList *pushtoprogramlist(ProgramList *programlist, ProgramConfiguration pr
 	return programlist;
 }
 
-void freeprogramlist(ProgramList* programlist) {
-	while(programlist != NULL) {
+int countprogramlist(ProgramList *programlist)
+{
+	int i = 0;
+	ProgramList *tip = programlist;
+	while (tip != NULL)
+	{
+		tip = tip->next;
+		++i;
+	}
+	return i;
+}
+
+void freeprogramlist(ProgramList *programlist)
+{
+	while (programlist != NULL)
+	{
 		ProgramList *tmp = programlist;
 		programlist = programlist->next;
 		freelogger(tmp->program.stdout_log);

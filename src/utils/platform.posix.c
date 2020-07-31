@@ -48,7 +48,7 @@ char *getcurrentdirfile(char *filename)
 int checkuser(const char *name)
 {
 	// TODO: figure out how to fix with statically linked
-	struct passwd * user = getpwnam(name);
+	struct passwd *user = getpwnam(name);
 	return user != NULL;
 }
 
@@ -77,6 +77,11 @@ const char *gettempdir()
 		return tmpdirs[i];
 	}
 	return getcurrentdirfile(NULL);
+}
+
+int getprocessid()
+{
+	return getpid();
 }
 
 int testsyslog()

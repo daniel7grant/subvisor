@@ -16,6 +16,7 @@ extern char *getcurrentdirfile(char *filename);
 extern int checkuser(const char *name);
 extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
+extern int getprocessid();
 extern int testsyslog();
 
 #endif

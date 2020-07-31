@@ -7,7 +7,7 @@ Core features of the supervisord specification, this should be implemented befor
 * ~~read configurations from conf file~~
 * ~~read configurations from arguments~~
 * ~~choose configuration file in order~~
-* validate configuration
+* ~~validate configuration~~
 * allow environmental variables
 * configure process forking
 * spawn processes with popen

@@ -50,7 +50,17 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	freeconfiguration(configuration);
+	FILE *pidfile = fopen(configuration->pidfile, "w");
+	if (pidfile == NULL)
+	{
+		usage("could not write pidfile %s", configuration->pidfile);
+		return EXIT_FAILURE;
+	}
+	fprintf(pidfile, "%d", getprocessid());
+	fclose(pidfile);
 
+	int programscount = countprogramlist(configuration->programs);
+
+	freeconfiguration(configuration);
 	return EXIT_SUCCESS;
 }
