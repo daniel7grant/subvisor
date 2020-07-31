@@ -9,6 +9,8 @@
 #include <string.h>
 #include <syslog.h>
 
+#include "../utils/platform.h"
+
 typedef struct Logger
 {
 	char logfile[MAX_LINE_LENGTH];

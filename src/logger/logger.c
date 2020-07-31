@@ -17,7 +17,7 @@ int openlogger(Logger *logger)
 {
 	if (logger->syslog)
 	{
-		// TODO: test if syslog exists
+		return testsyslog() ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 	logger->logwriter = fopen(logger->logfile, "w");
 	if (logger->logwriter == NULL)

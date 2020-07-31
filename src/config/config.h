@@ -3,12 +3,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #define MAX_LINE_LENGTH 1024
 
 #include "programconfig.h"
-#include "../utils.h"
+#include "../utils/utils.h"
+#include "../utils/platform.h"
 #include "../logger/logger.h"
 
 typedef struct Configuration

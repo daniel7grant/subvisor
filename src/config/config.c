@@ -47,11 +47,9 @@ int initializeblock(Configuration *configuration, char *block)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
-		char *cwd = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
-		getcwd(cwd, MAX_LINE_LENGTH);
+		char *cwdpid = getcurrentdirfile("supervisord.pid");
 
-		strcpy(configuration->pidfile, cwd);
-		strcat(configuration->pidfile, "/supervisord.pid");
+		strcpy(configuration->pidfile, cwdpid);
 		configuration->nodaemon = 0;
 		configuration->minfds = 1024;
 		configuration->minprocs = 200;
@@ -62,19 +60,17 @@ int initializeblock(Configuration *configuration, char *block)
 		strcpy(configuration->identifier, "subvisor");
 		strcpy(configuration->environment, "");
 		configuration->nocleanup = 0;
-		// TODO: strcpy(configuration->childlogdir, getenv("TMPDIR"));
 
-		char *logfile = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
-		strcpy(logfile, cwd);
-		strcat(logfile, "/supervisord.log");
+		const char *tempdir = gettempdir();
+		strcpy(configuration->childlogdir, tempdir);
 
-		Logger log = createlogger(logfile);
+		char *cwdlog = getcurrentdirfile("supervisord.log");
+		Logger log = createlogger(cwdlog);
 		log.loglevel = 2;
-
 		configuration->log = log;
 
-		free(logfile);
-		free(cwd);
+		free(cwdpid);
+		free(cwdlog);
 	}
 	else if (strcmp(block, "include") == 0)
 	{
@@ -501,13 +497,22 @@ int validateconfiguration(Configuration *configuration)
 		return EXIT_FAILURE;
 	}
 
-	// TODO: check directory access
-	// configuration->childlogdir
-	// configuration->directory
+	if (!checkaccess(configuration->childlogdir, 0)) {
+		usage("could not access directory %s", configuration->childlogdir);
+		return EXIT_FAILURE;
+	}
 
-	// TODO: check user existence
-	// emit warning if root
-	// configuration->user
+	if (!checkaccess(configuration->directory, 0)) {
+		usage("could not access directory %s", configuration->directory);
+		return EXIT_FAILURE;
+	}
+
+	if (!checkuser(configuration->user)) {
+		usage("user %s does not exist", configuration->user);
+		return EXIT_FAILURE;
+	}
+
+	// TODO: emit warning if root
 
 	ProgramList *programlist = configuration->programs;
 	while (programlist != NULL)
@@ -519,11 +524,15 @@ int validateconfiguration(Configuration *configuration)
 			return EXIT_FAILURE;
 		}
 
-		// TODO: check directory access
-		// program.directory
+		if (!checkaccess(program.directory, 0)) {
+			usage("could not access directory %s", program.directory);
+			return EXIT_FAILURE;
+		}
 
-		// TODO: check user existence
-		// program.user
+		if (!checkuser(configuration->user)) {
+			usage("user %s does not exist", configuration->user);
+			return EXIT_FAILURE;
+		}
 
 		if (program.numprocs > 1 && strstr(program.process_name, "%(process_num)"))
 		{

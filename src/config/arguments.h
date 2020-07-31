@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 #define SUBVISORD_VERSION "0.0.0"
 #define MAX_ARGUMENTS 100
