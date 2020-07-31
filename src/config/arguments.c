@@ -1,8 +1,10 @@
 #include "arguments.h"
 
 const Option options[] = {
-	{"minfds", 'a', "NUM", "the minimum number of file descriptors for start success"},
 	{"configuration", 'c', "FILENAME", "configuration file path (searches if not given)"},
+	{"nodaemon", 'n', 0, "run in the foreground (same as 'nodaemon=true' in config file)"},
+	{"silent", 's', 0, "no logs to stdout (maps to 'silent=true' in config file)"},
+	{"minfds", 'a', "NUM", "the minimum number of file descriptors for start success"},
 	{"directory", 'd', "DIR", "directory to chdir to when daemonized"},
 	{"loglevel", 'e', "LEVEL", "use LEVEL as log level (debug,info,warn,error,critical)"},
 	{"identifier", 'i', "STR", "identifier used for this instance of supervisord"},
@@ -12,9 +14,7 @@ const Option options[] = {
 	{"logfile_maxbytes", 'y', "BYTES", "use BYTES to limit the max size of logfile"},
 	{"logfile_backups", 'z', "NUM", "number of backups to keep when max bytes reached"},
 	{"umask", 'm', "UMASK", "use this umask for daemon subprocess (default is 022)"},
-	{"nodaemon", 'n', 0, "run in the foreground (same as 'nodaemon=true' in config file)"},
 	{"childlogdir", 'q', "DIR", "the log directory for child process logs"},
-	{"silent", 's', 0, "no logs to stdout (maps to 'silent=true' in config file)"},
 	{"strip_ansi", 't', 0, "strip ansi escape codes from process output"},
 	{"user", 'u', "USER", "run supervisord as this user (or numeric uid)"},
 	{"minprocs", 0, "NUM", "the minimum number of processes available for start success"},
