@@ -49,7 +49,7 @@ int checkuser(const char *name)
 
 int checkaccess(const char *path, int writeable)
 {
-	return _access(path, writeable ? 6 : 4);
+	return _access(path, writeable ? 6 : 4) == 0;
 }
 
 const char *gettempdir()

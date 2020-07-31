@@ -484,8 +484,7 @@ int validateconfiguration(Configuration *configuration)
 	// TODO: check existence of supervisord block (do we need this?)
 	// usage("%s", ".ini file does not include supervisord section");
 
-	FILE *pidfile = fopen(configuration->pidfile, "w");
-	if (pidfile == NULL)
+	if (!checkaccess(configuration->pidfile, 1))
 	{
 		usage("could not write pidfile %s", configuration->pidfile);
 		return EXIT_FAILURE;
@@ -497,12 +496,12 @@ int validateconfiguration(Configuration *configuration)
 		return EXIT_FAILURE;
 	}
 
-	if (!checkaccess(configuration->childlogdir, 0)) {
+	if (strlen(configuration->childlogdir) > 0 && !checkaccess(configuration->childlogdir, 0)) {
 		usage("could not access directory %s", configuration->childlogdir);
 		return EXIT_FAILURE;
 	}
 
-	if (!checkaccess(configuration->directory, 0)) {
+	if (strlen(configuration->directory) > 0 && !checkaccess(configuration->directory, 0)) {
 		usage("could not access directory %s", configuration->directory);
 		return EXIT_FAILURE;
 	}
@@ -524,7 +523,7 @@ int validateconfiguration(Configuration *configuration)
 			return EXIT_FAILURE;
 		}
 
-		if (!checkaccess(program.directory, 0)) {
+		if (strlen(program.directory) > 0 && !checkaccess(program.directory, 0)) {
 			usage("could not access directory %s", program.directory);
 			return EXIT_FAILURE;
 		}
@@ -573,5 +572,6 @@ FILE *checkfiles(const char *configurationfile, const char *defaultconfiguration
 void freeconfiguration(Configuration *configuration)
 {
 	freeprogramlist(configuration->programs);
+	freelogger(configuration->log);
 	free(configuration);
 }

@@ -54,7 +54,7 @@ int checkuser(const char *name)
 
 int checkaccess(const char *path, int writeable)
 {
-	return access(path, writeable ? (W_OK | R_OK) : R_OK);
+	return access(path, writeable ? (W_OK | R_OK) : R_OK) == 0;
 }
 
 const char *gettempdir()

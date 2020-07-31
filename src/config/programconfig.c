@@ -54,6 +54,8 @@ void freeprogramlist(ProgramList* programlist) {
 	while(programlist != NULL) {
 		ProgramList *tmp = programlist;
 		programlist = programlist->next;
+		freelogger(tmp->program.stdout_log);
+		freelogger(tmp->program.stderr_log);
 		free(tmp);
 	}
 }

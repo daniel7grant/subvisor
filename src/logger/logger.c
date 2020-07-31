@@ -10,6 +10,7 @@ Logger createlogger(const char *logfile)
 	logger.capture_maxbytes = 0;
 	logger.syslog = 0;
 	logger.events_enabled = 0;
+	logger.logwriter = NULL;
 	return logger;
 }
 
@@ -25,4 +26,10 @@ int openlogger(Logger *logger)
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
+}
+
+void freelogger(Logger logger) {
+	if (logger.logwriter != NULL) {
+		fclose(logger.logwriter);
+	}
 }

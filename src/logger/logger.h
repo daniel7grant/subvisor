@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
 
 #include "../utils/platform.h"
 
@@ -25,5 +24,6 @@ typedef struct Logger
 
 extern Logger createlogger(const char *logfile);
 extern int openlogger(Logger *logger);
+extern void freelogger(Logger logger);
 
 #endif
