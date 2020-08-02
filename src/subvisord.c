@@ -73,17 +73,14 @@ int main(int argc, char **argv)
 
 	for (int i = 0; i < programscount; ++i)
 	{
-		processes[i].pipe = openprocess(processes[i].config.command);
-		if (processes[i].pipe == NULL) {
-			printf("%d\n", errno);
-			perror(NULL);
-			fflush(NULL);
-		}
+		openprocess(&processes[i]);
 	}
+
+	readprocesses(processes, programscount);
 
 	for (int i = 0; i < programscount; ++i)
 	{
-		closeprocess(processes[0].pipe);
+		closeprocess(&processes[i]);
 	}
 
 	freeconfiguration(configuration);

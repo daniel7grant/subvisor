@@ -80,12 +80,17 @@ int getprocessid()
 	return _getpid();
 }
 
-FILE *openprocess(char *command)
+int openprocess(Process *process)
 {
-	return NULL;
+	return 0;
 }
 
-int closeprocess(FILE *pipe)
+int readprocesses(Process processes[], int processcount)
+{
+	return 0;
+}
+
+int closeprocess(Process *process)
 {
 	return 0;
 }

@@ -84,14 +84,96 @@ int getprocessid()
 	return getpid();
 }
 
-FILE *openprocess(char *command)
+int openprocess(Process *process)
 {
-	return popen(command, "r");
+	int stdoutfd[2];
+	int stderrfd[2];
+
+	int weerror;
+	wordexp_t arguments;
+	if ((weerror = wordexp(process->config.command, &arguments, WRDE_NOCMD)))
+	{
+		if (weerror == WRDE_NOSPACE)
+		{
+			wordfree(&arguments);
+		}
+		return EXIT_FAILURE;
+	}
+
+	if (pipe(stdoutfd) < 0 || pipe(stderrfd) < 0)
+	{
+		return EXIT_FAILURE;
+	}
+
+	if ((process->pid = fork()) < 0)
+	{
+		return EXIT_FAILURE;
+	}
+	else if (process->pid > 0)
+	{
+		close(stdoutfd[1]);
+		process->fd = stdoutfd[0];
+		wordfree(&arguments);
+		return EXIT_SUCCESS;
+	}
+	else
+	{
+		close(stdoutfd[0]);
+		if (dup2(stdoutfd[1], STDOUT_FILENO) != STDOUT_FILENO)
+		{
+			return EXIT_FAILURE;
+		}
+		close(stdoutfd[1]);
+		return execvp(arguments.we_wordv[0], arguments.we_wordv);
+	}
 }
 
-int closeprocess(FILE *pipe)
+int readprocesses(Process processes[], int processcount)
 {
-	return pclose(pipe);
+	fd_set active_fd_set;
+	struct timeval timeout;
+	char buffer[4096];
+
+	while (1)
+	{
+		timeout.tv_sec = 1;
+		timeout.tv_usec = 0;
+		FD_ZERO(&active_fd_set);
+		for (int i = 0; i < processcount; i++)
+		{
+			FD_SET(processes[i].fd, &active_fd_set);
+		}
+
+		if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, &timeout) < 0)
+		{
+			perror("select");
+			exit(EXIT_FAILURE);
+		}
+
+		for (int i = 0; i < FD_SETSIZE; ++i)
+		{
+			if (FD_ISSET(i, &active_fd_set))
+			{
+				ssize_t count = read(i, buffer, 1024);
+				if (count == 0)
+				{
+					return EXIT_SUCCESS;
+				}
+				if (count < 0)
+				{
+					return EXIT_FAILURE;
+				}
+				write(STDOUT_FILENO, buffer, count);
+			}
+		}
+	}
+}
+
+int closeprocess(Process *process)
+{
+	int status = EXIT_SUCCESS;
+	waitpid(-1, &status, 0);
+	return status;
 }
 
 int testsyslog()

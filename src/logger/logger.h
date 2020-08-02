@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../utils/platform.h"
-
 typedef struct Logger
 {
 	char logfile[MAX_LINE_LENGTH];

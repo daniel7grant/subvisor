@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "../utils/platform.h"
 
 Logger createlogger(const char *logfile)
 {

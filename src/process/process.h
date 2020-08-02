@@ -7,7 +7,7 @@
 
 #include "../config/programconfig.h"
 
-typedef enum ProcessState
+typedef enum PROCESS_STATE
 {
 	STOPPED = 0,
 	STARTING = 10,
@@ -17,14 +17,15 @@ typedef enum ProcessState
 	EXITED = 100,
 	FATAL = 200,
 	UNKNOWN = 1000
-} ProcessState;
+} PROCESS_STATE;
 
 typedef struct Process
 {
 	int pid;
 	ProgramConfiguration config;
-	ProcessState state;
+	PROCESS_STATE state;
 	FILE *pipe;
+	int fd;
 } Process;
 
 #endif

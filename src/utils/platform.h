@@ -9,6 +9,8 @@
 #include "platform.posix.h"
 #endif // _WIN32 || WIN32
 
+#include "../process/process.h"
+
 extern const char *defaultconfigurationfiles[];
 extern int defaultconfigurationcount;
 
@@ -18,7 +20,8 @@ extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
 extern int getprocessid();
 extern int testsyslog();
-extern FILE *openprocess(char *command);
-int closeprocess(FILE *pipe);
+extern int openprocess(Process *process);
+extern int readprocesses(Process processes[], int processcount);
+extern int closeprocess(Process *process);
 
 #endif
