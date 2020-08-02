@@ -15,7 +15,8 @@ extern const char *defaultconfigurationfiles[];
 extern int defaultconfigurationcount;
 
 extern char *getcurrentdirfile(char *filename);
-extern int checkuser(const char *name);
+extern int getuserid(const char *name);
+extern int getcurrentuserid();
 extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
 extern int getprocessid();

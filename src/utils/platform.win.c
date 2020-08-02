@@ -41,10 +41,15 @@ char *getcurrentdirfile(char *filename)
 	return cwd;
 }
 
-int checkuser(const char *name)
+int getcurrentuserid()
+{
+	return 0;
+}
+
+int getuserid(const char *name)
 {
 	// TODO: warning, it translates to a noop in Windows
-	return 1;
+	return 0;
 }
 
 int checkaccess(const char *path, int writeable)

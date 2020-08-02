@@ -45,11 +45,15 @@ char *getcurrentdirfile(char *filename)
 	return cwd;
 }
 
-int checkuser(const char *name)
+int getcurrentuserid()
 {
-	// TODO: figure out how to fix with statically linked
+	return getuid();
+}
+
+int getuserid(const char *name)
+{
 	struct passwd *user = getpwnam(name);
-	return user != NULL;
+	return user != NULL ? (int) user->pw_uid : -1;
 }
 
 int checkaccess(const char *path, int writeable)

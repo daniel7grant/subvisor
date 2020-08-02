@@ -15,16 +15,67 @@ int toboolean(char *var)
 	return strcmp(var, "true") == 0 || strcmp(var, "1") == 0;
 }
 
-int tobyte(char *var)
+long long int tobyte(char *var)
 {
-	return atoi(var);
+	long long int multiplier = 1;
+	int varlength = strlen(var);
+	if (var[varlength - 1] == 'b' || var[varlength - 1] == 'B')
+	{
+		switch (var[varlength - 2])
+		{
+		case 'k':
+		case 'K':
+			multiplier = 1024;
+			break;
+		case 'm':
+		case 'M':
+			multiplier = 1024 * 1024;
+			break;
+		case 'g':
+		case 'G':
+			multiplier = 1024 * 1024 * 1024;
+			break;
+		default:
+			multiplier = 1;
+		}
+	}
+	return multiplier * atoi(var);
 }
 
-int tologlevel(char *var)
+LOGLEVEL tologlevel(char *var)
 {
-	return atoi(var);
+	if (strcmp(var, "critical"))
+	{
+		return CRITICAL;
+	}
+	if (strcmp(var, "error"))
+	{
+		return ERROR;
+	}
+	if (strcmp(var, "warn"))
+	{
+		return WARN;
+	}
+	if (strcmp(var, "info"))
+	{
+		return INFO;
+	}
+	if (strcmp(var, "debug"))
+	{
+		return DEBUG;
+	}
+	if (strcmp(var, "trace"))
+	{
+		return TRACE;
+	}
+	if (strcmp(var, "blather"))
+	{
+		return BLATHER;
+	}
+	return -1;
 }
 
+// TODO: this should strings to exit code matches
 int toexitcode(char *var)
 {
 	return atoi(var);
@@ -490,22 +541,40 @@ int validateconfiguration(Configuration *configuration)
 		return EXIT_FAILURE;
 	}
 
-	if (strlen(configuration->childlogdir) > 0 && !checkaccess(configuration->childlogdir, 0)) {
+	if (strlen(configuration->childlogdir) > 0 && !checkaccess(configuration->childlogdir, 0))
+	{
 		usage("could not access directory %s", configuration->childlogdir);
 		return EXIT_FAILURE;
 	}
 
-	if (strlen(configuration->directory) > 0 && !checkaccess(configuration->directory, 0)) {
+	if (strlen(configuration->directory) > 0 && !checkaccess(configuration->directory, 0))
+	{
 		usage("could not access directory %s", configuration->directory);
 		return EXIT_FAILURE;
 	}
 
-	if (strlen(configuration->user) > 0 && !checkuser(configuration->user)) {
-		usage("user %s does not exist", configuration->user);
+	int uid = getcurrentuserid();
+	if (strlen(configuration->user) > 0)
+	{
+		int supervisoruid = getuserid(configuration->user);
+
+		if (uid > 0 && uid != supervisoruid)
+		{
+			usage("%s", "can't drop privilege as nonroot user");
+			return EXIT_FAILURE;
+		}
+
+		if (supervisoruid < 0)
+		{
+			usage("user %s does not exist", configuration->user);
+			return EXIT_FAILURE;
+		}
+	}
+	else if (uid == 0)
+	{
+		usage("%s", "subvisor is running as root. Privileges were not dropped because no user is specified in the config file. If you intend to run as root, you can set user=root in the config file to avoid this message.");
 		return EXIT_FAILURE;
 	}
-
-	// TODO: emit warning if root
 
 	ProgramList *programlist = configuration->programs;
 	while (programlist != NULL)
@@ -517,12 +586,14 @@ int validateconfiguration(Configuration *configuration)
 			return EXIT_FAILURE;
 		}
 
-		if (strlen(program.directory) > 0 && !checkaccess(program.directory, 0)) {
+		if (strlen(program.directory) > 0 && !checkaccess(program.directory, 0))
+		{
 			usage("could not access directory %s", program.directory);
 			return EXIT_FAILURE;
 		}
 
-		if (strlen(program.user) > 0 && !checkuser(program.user)) {
+		if (strlen(program.user) > 0 && getuserid(program.user) < 0)
+		{
 			usage("user %s does not exist", program.user);
 			return EXIT_FAILURE;
 		}

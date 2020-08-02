@@ -8,12 +8,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef enum LOGLEVEL
+{
+	CRITICAL = 50,
+	ERROR = 40,
+	WARN = 30,
+	INFO = 20,
+	DEBUG = 10,
+	TRACE = 5,
+	BLATHER = 1
+} LOGLEVEL;
+
 typedef struct Logger
 {
 	char logfile[MAX_LINE_LENGTH];
-	int logfile_maxbytes;
+	long long int logfile_maxbytes;
+	long long int capture_maxbytes;
 	int logfile_backups;
-	int capture_maxbytes;
 	int loglevel;
 	int syslog;
 	int events_enabled;
