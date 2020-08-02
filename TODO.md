@@ -9,8 +9,8 @@ Core features of the supervisord specification, this should be implemented befor
 * ~~choose configuration file in order~~
 * ~~validate configuration~~
 * allow environmental variables
-* configure process forking
-* spawn processes with popen
+* ~~configure process forking~~
+* ~~spawn processes~~
 * monitor process states
 * restart processes automatically
 * redirect stdout and stderr
