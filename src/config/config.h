@@ -7,8 +7,6 @@
 #define MAX_LINE_LENGTH 1024
 
 #include "programconfig.h"
-#include "../utils/utils.h"
-#include "../utils/platform.h"
 #include "../logger/logger.h"
 
 typedef struct Configuration
@@ -32,6 +30,6 @@ typedef struct Configuration
 extern Configuration *readfromfile(FILE *filename, char **arguments);
 extern int validateconfiguration(Configuration *configuration);
 extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
-extern void freeconfiguration(Configuration* configuration);
+extern void freeconfiguration(Configuration *configuration);
 
 #endif

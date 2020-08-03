@@ -1,4 +1,6 @@
 #include "config.h"
+#include "../utils/utils.h"
+#include "../utils/platform.h"
 
 int endofline(char c)
 {
@@ -81,7 +83,7 @@ int toexitcode(char *var)
 	return atoi(var);
 }
 
-PROGRAM_AUTORESTART autorestart(char *var)
+PROGRAM_AUTORESTART toautorestart(char *var)
 {
 	if (strcmp(var, "true") == 0 || strcmp(var, "1") == 0)
 	{
@@ -262,7 +264,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "autorestart") == 0)
 		{
-			programlist->program.autorestart = autorestart(value);
+			programlist->program.autorestart = toautorestart(value);
 		}
 		else if (strcmp(key, "startsecs") == 0)
 		{
