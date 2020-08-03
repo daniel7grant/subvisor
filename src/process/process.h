@@ -25,7 +25,8 @@ typedef struct Process
 	ProgramConfiguration config;
 	PROCESS_STATE state;
 	FILE *pipe;
-	int fd;
+	int stdoutfd;
+	int stderrfd;
 } Process;
 
 #endif

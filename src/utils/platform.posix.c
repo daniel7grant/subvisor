@@ -53,7 +53,7 @@ int getcurrentuserid()
 int getuserid(const char *name)
 {
 	struct passwd *user = getpwnam(name);
-	return user != NULL ? (int) user->pw_uid : -1;
+	return user != NULL ? (int)user->pw_uid : -1;
 }
 
 int checkaccess(const char *path, int writeable)
@@ -83,9 +83,86 @@ const char *gettempdir()
 	return getcurrentdirfile(NULL);
 }
 
-int getprocessid()
+int prepareparent(Configuration *configuration)
 {
-	return getpid();
+	if (!configuration->nodaemon)
+	{
+		int forkedid = fork();
+		if (forkedid < 0)
+		{
+			return EXIT_FAILURE;
+		}
+		if (forkedid > 0)
+		{
+			// terminate parent
+			exit(EXIT_SUCCESS);
+		}
+		// obtain new session
+		setsid();
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		close(STDERR_FILENO);
+
+		if (strlen(configuration->directory) > 0)
+		{
+			chdir(configuration->directory);
+		}
+	}
+
+	FILE *pidfile = fopen(configuration->pidfile, "w");
+	if (pidfile == NULL)
+	{
+		// usage("could not write pidfile %s", configuration->pidfile);
+		return EXIT_FAILURE;
+	}
+	fprintf(pidfile, "%d", getpid());
+	fclose(pidfile);
+
+	int currentuid = getcurrentuserid();
+
+	struct rlimit rlfds;
+	getrlimit(RLIMIT_NOFILE, &rlfds);
+	rlfds.rlim_cur = configuration->minfds;
+	if (currentuid == 0)
+	{
+		rlfds.rlim_max = configuration->minfds;
+	}
+	if (setrlimit(RLIMIT_NOFILE, &rlfds))
+	{
+		return EXIT_FAILURE;
+	}
+
+	// TODO: setting a process limit makes forks fail
+	// struct rlimit rlproc;
+	// getrlimit(RLIMIT_NPROC, &rlproc);
+	// rlproc.rlim_cur = configuration->minprocs;
+	// if (currentuid == 0)
+	// {
+	// 	rlproc.rlim_max = configuration->minprocs;
+	// }
+	// if (setrlimit(RLIMIT_NPROC, &rlproc))
+	// {
+	// 	return EXIT_FAILURE;
+	// }
+
+	umask(configuration->umask);
+
+	if (strlen(configuration->user) > 0)
+	{
+		int uid = getuserid(configuration->user);
+		if (uid < 0)
+		{
+			return EXIT_FAILURE;
+		}
+		if (uid > 0 && setuid(uid))
+		{
+			return EXIT_FAILURE;
+		}
+	}
+
+	// TODO: add environment variables
+
+	return EXIT_SUCCESS;
 }
 
 int openprocess(Process *process)
@@ -109,6 +186,7 @@ int openprocess(Process *process)
 		return EXIT_FAILURE;
 	}
 
+	// TODO: start multiple processes
 	if ((process->pid = fork()) < 0)
 	{
 		return EXIT_FAILURE;
@@ -116,19 +194,44 @@ int openprocess(Process *process)
 	else if (process->pid > 0)
 	{
 		close(stdoutfd[1]);
-		process->fd = stdoutfd[0];
+		close(stderrfd[1]);
+		process->stdoutfd = stdoutfd[0];
+		process->stderrfd = stderrfd[0];
 		wordfree(&arguments);
 		return EXIT_SUCCESS;
 	}
 	else
 	{
 		close(stdoutfd[0]);
-		if (dup2(stdoutfd[1], STDOUT_FILENO) != STDOUT_FILENO)
+		close(stderrfd[0]);
+		if (dup2(stdoutfd[1], STDOUT_FILENO) != STDOUT_FILENO || dup2(stderrfd[1], STDERR_FILENO) != STDERR_FILENO)
 		{
 			return EXIT_FAILURE;
 		}
 		close(stdoutfd[1]);
-		return execvp(arguments.we_wordv[0], arguments.we_wordv);
+		close(stderrfd[1]);
+
+		umask(process->config.umask);
+		if (strlen(process->config.directory) > 0)
+		{
+			chdir(process->config.directory);
+		}
+		if (strlen(process->config.user) > 0)
+		{
+			int uid = getuserid(process->config.user);
+			if (uid < 0)
+			{
+				return EXIT_FAILURE;
+			}
+			if (uid > 0 && setuid(uid))
+			{
+				return EXIT_FAILURE;
+			}
+		}
+
+		execvp(arguments.we_wordv[0], arguments.we_wordv);
+		wordfree(&arguments);
+		return EXIT_FAILURE;
 	}
 }
 
@@ -145,7 +248,8 @@ int readprocesses(Process processes[], int processcount)
 		FD_ZERO(&active_fd_set);
 		for (int i = 0; i < processcount; i++)
 		{
-			FD_SET(processes[i].fd, &active_fd_set);
+			FD_SET(processes[i].stdoutfd, &active_fd_set);
+			FD_SET(processes[i].stderrfd, &active_fd_set);
 		}
 
 		if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, &timeout) < 0)
@@ -161,7 +265,7 @@ int readprocesses(Process processes[], int processcount)
 				ssize_t count = read(i, buffer, 1024);
 				if (count == 0)
 				{
-					return EXIT_SUCCESS;
+					break;
 				}
 				if (count < 0)
 				{

@@ -80,9 +80,9 @@ const char *gettempdir()
 	return getcurrentdirfile(NULL);
 }
 
-int getprocessid()
+int prepareparent(Configuration *configuration)
 {
-	return _getpid();
+	return 0;
 }
 
 int openprocess(Process *process)

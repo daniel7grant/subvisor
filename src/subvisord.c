@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/wait.h>
 
 #include "utils/utils.h"
 #include "utils/platform.h"
@@ -53,14 +52,10 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	FILE *pidfile = fopen(configuration->pidfile, "w");
-	if (pidfile == NULL)
+	if (prepareparent(configuration))
 	{
-		usage("could not write pidfile %s", configuration->pidfile);
 		return EXIT_FAILURE;
 	}
-	fprintf(pidfile, "%d", getprocessid());
-	fclose(pidfile);
 
 	int programscount = countprogramlist(configuration->programs);
 	Process *processes = (Process *)malloc(programscount * sizeof(Process));
@@ -71,9 +66,13 @@ int main(int argc, char **argv)
 		processes[i].config = tip->program;
 	}
 
+	// TODO: order by priority
 	for (int i = 0; i < programscount; ++i)
 	{
-		openprocess(&processes[i]);
+		if (processes[i].config.autostart)
+		{
+			openprocess(&processes[i]);
+		}
 	}
 
 	readprocesses(processes, programscount);
