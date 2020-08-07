@@ -83,6 +83,11 @@ const char *gettempdir()
 	return getcurrentdirfile(NULL);
 }
 
+int testsyslog()
+{
+	return 1;
+}
+
 int prepareparent(Configuration *configuration)
 {
 	if (!configuration->nodaemon)
@@ -202,6 +207,8 @@ int openprocess(Process *process)
 	}
 	else
 	{
+		// TODO: open separate processgroup for process? (setpgid)
+
 		close(stdoutfd[0]);
 		close(stderrfd[0]);
 		if (dup2(stdoutfd[1], STDOUT_FILENO) != STDOUT_FILENO || dup2(stderrfd[1], STDERR_FILENO) != STDERR_FILENO)
@@ -284,7 +291,64 @@ int closeprocess(Process *process)
 	return status;
 }
 
-int testsyslog()
+void handler(int sig)
 {
-	return 1;
+	switch (sig)
+	{
+	case SIGTERM:
+	case SIGINT:
+	case SIGQUIT:
+		// TODO: kill processes
+		exit(999);
+		break;
+	case SIGHUP:
+		// TODO: restart all processes
+	case SIGUSR2:
+		// TODO: reopen child logs
+		break;
+	default:
+		break;
+	}
+}
+
+void childhandler(int sig)
+{
+	int pid;
+	while ((pid = waitpid(-1, 0, WNOHANG)) > 0)
+	{
+	}
+	// TODO: set process status
+}
+
+int handlesignals()
+{
+	// TODO: set signal mask with setprocmask
+
+	struct sigaction sa;
+	sa.sa_handler = &handler;
+	sigfillset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART;
+	int signals[] = {SIGTERM, SIGINT, SIGQUIT, SIGHUP, SIGUSR2};
+	int signalcount = sizeof(signals) / sizeof(signals[0]);
+	for (int i = 0; i < signalcount; ++i)
+	{
+		if (sigaction(signals[i], &sa, 0) == -1)
+		{
+			return EXIT_FAILURE;
+		}
+	}
+	return EXIT_SUCCESS;
+}
+
+int handleprocesssignals()
+{
+	struct sigaction sa;
+	sa.sa_handler = &childhandler;
+	sigfillset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	if (sigaction(SIGCHLD, &sa, 0) == -1)
+	{
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
 }

@@ -1,7 +1,10 @@
 #ifndef _PLATFORM_POSIX_H_INCLUDED_
 #define _PLATFORM_POSIX_H_INCLUDED_
 
+#define _GNU_SOURCE
+
 #include <pwd.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

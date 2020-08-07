@@ -11,6 +11,8 @@
 
 int main(int argc, char **argv)
 {
+	handlesignals();
+
 	arg0 = argv[0];
 
 	ParsedArguments arguments;
@@ -74,6 +76,8 @@ int main(int argc, char **argv)
 			openprocess(&processes[i]);
 		}
 	}
+
+	handleprocesssignals();
 
 	readprocesses(processes, programscount);
 

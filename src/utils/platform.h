@@ -21,9 +21,13 @@ extern int getcurrentuserid();
 extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
 extern int testsyslog();
+
 extern int prepareparent(Configuration *configuration);
 extern int openprocess(Process *process);
 extern int readprocesses(Process processes[], int processcount);
 extern int closeprocess(Process *process);
+
+extern int handlesignals();
+extern int handleprocesssignals();
 
 #endif
