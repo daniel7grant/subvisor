@@ -59,17 +59,20 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	int programscount = countprogramlist(configuration->programs);
-	Process *processes = (Process *)malloc(programscount * sizeof(Process));
+	processcount = countprogramlist(configuration->programs);
+	processes = (Process *)malloc(processcount * sizeof(Process));
 	ProgramList *tip = configuration->programs;
-	for (int i = 0; i < programscount; ++i, tip = tip->next)
+	for (int i = 0; i < processcount; ++i, tip = tip->next)
 	{
 		processes[i].pid = 0;
 		processes[i].config = tip->program;
+		processes[i].state = STOPPED;
+		processes[i].retries = 0;
 	}
 
 	// TODO: order by priority
-	for (int i = 0; i < programscount; ++i)
+	// TODO: start multiple processes
+	for (int i = 0; i < processcount; ++i)
 	{
 		if (processes[i].config.autostart)
 		{
@@ -79,9 +82,26 @@ int main(int argc, char **argv)
 
 	handleprocesssignals();
 
-	readprocesses(processes, programscount);
+	while (readprocesses(processes, processcount) == 0)
+	{
+		for (int i = 0; i < processcount; i++)
+		{
+			if (processes[i].state == STARTING)
+			{
+				processes[i].state = RUNNING;
+			}
+			else if (processes[i].state == STOPPING)
+			{
+				processes[i].state = STOPPED;
+			}
+			else if (processes[i].state == BACKOFF)
+			{
+				openprocess(&processes[i]);
+			}
+		}
+	}
 
-	for (int i = 0; i < programscount; ++i)
+	for (int i = 0; i < processcount; ++i)
 	{
 		closeprocess(&processes[i]);
 	}

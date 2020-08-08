@@ -191,13 +191,13 @@ int openprocess(Process *process)
 		return EXIT_FAILURE;
 	}
 
-	// TODO: start multiple processes
 	if ((process->pid = fork()) < 0)
 	{
 		return EXIT_FAILURE;
 	}
 	else if (process->pid > 0)
 	{
+		process->state = STARTING;
 		close(stdoutfd[1]);
 		close(stderrfd[1]);
 		process->stdoutfd = stdoutfd[0];
@@ -241,47 +241,41 @@ int openprocess(Process *process)
 		return EXIT_FAILURE;
 	}
 }
-
 int readprocesses(Process processes[], int processcount)
 {
 	fd_set active_fd_set;
-	struct timeval timeout;
 	char buffer[4096];
-
-	while (1)
+	struct timeval timeout = {.tv_sec = 1, .tv_usec = 0};
+	FD_ZERO(&active_fd_set);
+	for (int i = 0; i < processcount; i++)
 	{
-		timeout.tv_sec = 1;
-		timeout.tv_usec = 0;
-		FD_ZERO(&active_fd_set);
-		for (int i = 0; i < processcount; i++)
-		{
-			FD_SET(processes[i].stdoutfd, &active_fd_set);
-			FD_SET(processes[i].stderrfd, &active_fd_set);
-		}
+		FD_SET(processes[i].stdoutfd, &active_fd_set);
+		FD_SET(processes[i].stderrfd, &active_fd_set);
+	}
 
-		if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, &timeout) < 0)
-		{
-			perror("select");
-			exit(EXIT_FAILURE);
-		}
+	if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, &timeout) < 0)
+	{
+		perror("select");
+		return EXIT_FAILURE;
+	}
 
-		for (int i = 0; i < FD_SETSIZE; ++i)
+	for (int i = 0; i < FD_SETSIZE; ++i)
+	{
+		if (FD_ISSET(i, &active_fd_set))
 		{
-			if (FD_ISSET(i, &active_fd_set))
+			ssize_t count = read(i, buffer, 1024);
+			if (count == 0)
 			{
-				ssize_t count = read(i, buffer, 1024);
-				if (count == 0)
-				{
-					break;
-				}
-				if (count < 0)
-				{
-					return EXIT_FAILURE;
-				}
-				write(STDOUT_FILENO, buffer, count);
+				break;
 			}
+			if (count < 0)
+			{
+				return EXIT_FAILURE;
+			}
+			write(STDOUT_FILENO, buffer, count);
 		}
 	}
+	return EXIT_SUCCESS;
 }
 
 int closeprocess(Process *process)
@@ -313,11 +307,36 @@ void handler(int sig)
 
 void childhandler(int sig)
 {
-	int pid;
-	while ((pid = waitpid(-1, 0, WNOHANG)) > 0)
+	int pid, status;
+	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
 	{
+		Process *process = findprocess(pid);
+		if (WIFEXITED(status))
+		{
+			if (shouldrestart(process, WEXITSTATUS(status)) && ++process->retries <= process->config.startretries)
+			{
+				process->state = BACKOFF;
+			}
+			else
+			{
+				if (process->state == RUNNING)
+				{
+					process->state = EXITED;
+				}
+				else
+				{
+					process->state = FATAL;
+				}
+			}
+		}
+		else if (WIFSIGNALED(status))
+		{
+			if (process->state == STARTING || process->state == RUNNING || process->state == FATAL)
+			{
+				process->state = STOPPING;
+			}
+		}
 	}
-	// TODO: set process status
 }
 
 int handlesignals()

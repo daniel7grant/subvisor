@@ -3,14 +3,14 @@
 
 #define MAX_LINE_LENGTH 1024
 
+#include "../process/process.h"
+#include "../config/config.h"
+
 #if defined(_WIN32) || defined(WIN32)
 #include "platform.win.h"
 #else
 #include "platform.posix.h"
 #endif // _WIN32 || WIN32
-
-#include "../config/config.h"
-#include "../process/process.h"
 
 extern const char *defaultconfigurationfiles[];
 extern int defaultconfigurationcount;

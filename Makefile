@@ -24,6 +24,7 @@ build/subvisord: build src/subvisord.c build/config/arguments.o build/config/con
 		build/config/config.o \
 		build/config/programconfig.o \
 		build/logger/logger.o \
+		build/process/process.o \
 		build/utils/platform.posix.o \
 		build/utils/platform.win.o \
 		build/utils/utils.o

@@ -25,8 +25,15 @@ typedef struct Process
 	ProgramConfiguration config;
 	PROCESS_STATE state;
 	FILE *pipe;
+	int retries;
 	int stdoutfd;
 	int stderrfd;
 } Process;
+
+extern Process *processes;
+extern int processcount;
+
+extern Process *findprocess(int pid);
+extern int shouldrestart(Process *process, int code);
 
 #endif

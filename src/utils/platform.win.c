@@ -105,3 +105,13 @@ int testsyslog()
 	// Windows doesn't support syslog
 	return 0;
 }
+
+int handlesignals()
+{
+	return 0;
+}
+
+int handleprocesssignals()
+{
+	return 0;
+}
