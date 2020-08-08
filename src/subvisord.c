@@ -62,11 +62,12 @@ int main(int argc, char **argv)
 
 	processcount = countprogramlist(configuration->programs);
 	processes = (Process *)malloc(processcount * sizeof(Process));
+	printf("%ld", sizeof(Process));
 	ProgramList *tip = configuration->programs;
 	for (int i = 0; i < processcount; ++i, tip = tip->next)
 	{
 		processes[i].pid = 0;
-		processes[i].config = tip->program;
+		processes[i].config = &tip->program;
 		processes[i].state = STOPPED;
 		processes[i].retries = 0;
 	}
@@ -75,7 +76,7 @@ int main(int argc, char **argv)
 	// TODO: start multiple processes
 	for (int i = 0; i < processcount; ++i)
 	{
-		if (processes[i].config.autostart)
+		if (processes[i].config->autostart)
 		{
 			openprocess(&processes[i]);
 		}
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
 		time(&now);
 		for (int i = 0; i < processcount; ++i)
 		{
-			if (processes[i].state == STARTING && difftime(now, processes[i].starttime) > processes[i].config.startsecs)
+			if (processes[i].state == STARTING && difftime(now, processes[i].starttime) > processes[i].config->startsecs)
 			{
 				processes[i].state = RUNNING;
 			}
@@ -104,7 +105,7 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < processcount; ++i)
 		{
-			fprintf(stderr, "%s (%d): %d\n", processes[i].config.process_name, processes[i].pid, processes[i].state);
+			fprintf(stderr, "%s (%d): %d\n", processes[i].config->process_name, processes[i].pid, processes[i].state);
 		}
 	}
 

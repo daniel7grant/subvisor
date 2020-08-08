@@ -23,7 +23,7 @@ typedef enum PROCESS_STATE
 typedef struct Process
 {
 	int pid;
-	ProgramConfiguration config;
+	ProgramConfiguration *config;
 	PROCESS_STATE state;
 	time_t starttime;
 	int retries;

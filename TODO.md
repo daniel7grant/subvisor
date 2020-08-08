@@ -11,8 +11,8 @@ Core features of the supervisord specification, this should be implemented befor
 * allow environmental variables
 * ~~configure process forking~~
 * ~~spawn processes~~
-* monitor process states
-* restart processes automatically
+* ~~monitor process states~~
+* ~~restart processes automatically~~
 * redirect stdout and stderr
 * rotate logs of processes
 * handle processes as groups

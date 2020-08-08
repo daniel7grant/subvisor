@@ -20,7 +20,7 @@ Process *findprocess(int pid)
 
 int shouldrestart(Process *process, int code)
 {
-	return process->config.autorestart == UNEXPECTED
-			   ? process->config.exitcodes != code
-			   : process->config.autorestart;
+	return process->config->autorestart == UNEXPECTED
+			   ? process->config->exitcodes != code
+			   : process->config->autorestart;
 }

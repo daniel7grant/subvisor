@@ -177,7 +177,7 @@ int openprocess(Process *process)
 
 	int weerror;
 	wordexp_t arguments;
-	if ((weerror = wordexp(process->config.command, &arguments, WRDE_NOCMD)))
+	if ((weerror = wordexp(process->config->command, &arguments, WRDE_NOCMD)))
 	{
 		if (weerror == WRDE_NOSPACE)
 		{
@@ -219,14 +219,14 @@ int openprocess(Process *process)
 		close(stdoutfd[1]);
 		close(stderrfd[1]);
 
-		umask(process->config.umask);
-		if (strlen(process->config.directory) > 0)
+		umask(process->config->umask);
+		if (strlen(process->config->directory) > 0)
 		{
-			chdir(process->config.directory);
+			chdir(process->config->directory);
 		}
-		if (strlen(process->config.user) > 0)
+		if (strlen(process->config->user) > 0)
 		{
-			int uid = getuserid(process->config.user);
+			int uid = getuserid(process->config->user);
 			if (uid < 0)
 			{
 				return EXIT_FAILURE;
@@ -363,7 +363,7 @@ void childhandler(int sig)
 		Process *process = findprocess(pid);
 		if (WIFEXITED(status))
 		{
-			if (shouldrestart(process, WEXITSTATUS(status)) && ++process->retries <= process->config.startretries)
+			if (shouldrestart(process, WEXITSTATUS(status)) && ++process->retries <= process->config->startretries)
 			{
 				process->state = BACKOFF;
 			}
