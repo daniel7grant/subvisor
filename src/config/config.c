@@ -12,90 +12,6 @@ int whitespace(char c)
 	return c == ' ' || c == '\r' || c == '\n' || c == '\t';
 }
 
-int toboolean(char *var)
-{
-	return strcmp(var, "true") == 0 || strcmp(var, "1") == 0;
-}
-
-long long int tobyte(char *var)
-{
-	long long int multiplier = 1;
-	int varlength = strlen(var);
-	if (var[varlength - 1] == 'b' || var[varlength - 1] == 'B')
-	{
-		switch (var[varlength - 2])
-		{
-		case 'k':
-		case 'K':
-			multiplier = 1024;
-			break;
-		case 'm':
-		case 'M':
-			multiplier = 1024 * 1024;
-			break;
-		case 'g':
-		case 'G':
-			multiplier = 1024 * 1024 * 1024;
-			break;
-		default:
-			multiplier = 1;
-		}
-	}
-	return multiplier * atoi(var);
-}
-
-LOGLEVEL tologlevel(char *var)
-{
-	if (strcmp(var, "critical"))
-	{
-		return CRITICAL;
-	}
-	if (strcmp(var, "error"))
-	{
-		return ERROR;
-	}
-	if (strcmp(var, "warn"))
-	{
-		return WARN;
-	}
-	if (strcmp(var, "info"))
-	{
-		return INFO;
-	}
-	if (strcmp(var, "debug"))
-	{
-		return DEBUG;
-	}
-	if (strcmp(var, "trace"))
-	{
-		return TRACE;
-	}
-	if (strcmp(var, "blather"))
-	{
-		return BLATHER;
-	}
-	return -1;
-}
-
-// TODO: this should strings to exit code matches
-int toexitcode(char *var)
-{
-	return atoi(var);
-}
-
-PROGRAM_AUTORESTART toautorestart(char *var)
-{
-	if (strcmp(var, "true") == 0 || strcmp(var, "1") == 0)
-	{
-		return TRUE;
-	}
-	if (strcmp(var, "false") == 0 || strcmp(var, "0") == 0)
-	{
-		return FALSE;
-	}
-	return UNEXPECTED;
-}
-
 int initializeblock(Configuration *configuration, char *block)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
@@ -164,19 +80,39 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "nodaemon") == 0)
 		{
-			configuration->nodaemon = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			configuration->nodaemon = boolval;
 		}
 		else if (strcmp(key, "minfds") == 0)
 		{
-			configuration->minfds = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			configuration->minfds = numval;
 		}
 		else if (strcmp(key, "minprocs") == 0)
 		{
-			configuration->minprocs = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			configuration->minprocs = numval;
 		}
 		else if (strcmp(key, "umask") == 0)
 		{
-			configuration->umask = strtol(value, NULL, 8);
+			int numval = tonumber(value, 8);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			configuration->umask = numval;
 		}
 		else if (strcmp(key, "user") == 0)
 		{
@@ -188,7 +124,12 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "strip_ansi") == 0)
 		{
-			configuration->strip_ansi = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			configuration->strip_ansi = boolval;
 		}
 		else if (strcmp(key, "identifier") == 0)
 		{
@@ -196,11 +137,17 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "environment") == 0)
 		{
+			// TODO: tokenize environment string
 			strcpy(configuration->environment, value);
 		}
 		else if (strcmp(key, "nocleanup") == 0)
 		{
-			configuration->nocleanup = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			configuration->nocleanup = boolval;
 		}
 		else if (strcmp(key, "childlogdir") == 0)
 		{
@@ -212,15 +159,30 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "logfile_maxbytes") == 0)
 		{
-			configuration->log.logfile_maxbytes = tobyte(value);
+			int byteval = tobyte(value);
+			if (byteval < 0)
+			{
+				return -1;
+			}
+			configuration->log.logfile_maxbytes = byteval;
 		}
 		else if (strcmp(key, "loglevel") == 0)
 		{
-			configuration->log.loglevel = tologlevel(value);
+			int logval = tologlevel(value);
+			if (logval < 0)
+			{
+				return -1;
+			}
+			configuration->log.loglevel = logval;
 		}
 		else if (strcmp(key, "logfile_backups") == 0)
 		{
-			configuration->log.logfile_backups = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			configuration->log.logfile_backups = numval;
 		}
 		else
 		{
@@ -244,59 +206,129 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "numprocs") == 0)
 		{
-			programlist->program.numprocs = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.numprocs = numval;
 		}
 		else if (strcmp(key, "numprocs_start") == 0)
 		{
-			programlist->program.numprocs_start = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.numprocs_start = numval;
 		}
 		else if (strcmp(key, "umask") == 0)
 		{
-			programlist->program.umask = strtol(value, NULL, 8);
+			int numval = tonumber(value, 8);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.umask = numval;
 		}
 		else if (strcmp(key, "priority") == 0)
 		{
-			programlist->program.priority = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.priority = numval;
 		}
 		else if (strcmp(key, "autostart") == 0)
 		{
-			programlist->program.autostart = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.autostart = boolval;
 		}
 		else if (strcmp(key, "autorestart") == 0)
 		{
-			programlist->program.autorestart = toautorestart(value);
+			int restartval = toautorestart(value);
+			if (restartval < 0)
+			{
+				return -1;
+			}
+			programlist->program.autorestart = restartval;
 		}
 		else if (strcmp(key, "startsecs") == 0)
 		{
-			programlist->program.startsecs = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.startsecs = numval;
 		}
 		else if (strcmp(key, "startretries") == 0)
 		{
-			programlist->program.startretries = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.startretries = numval;
 		}
 		else if (strcmp(key, "exitcodes") == 0)
 		{
-			programlist->program.exitcodes = toexitcode(value);
+			int exitcodes = toexitcode(value);
+			if (exitcodes < 0)
+			{
+				return -1;
+			}
+			programlist->program.exitcodes = exitcodes;
 		}
 		else if (strcmp(key, "stopsignal") == 0)
 		{
-			programlist->program.stopsignal = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stopsignal = numval;
 		}
 		else if (strcmp(key, "stopwaitsecs") == 0)
 		{
-			programlist->program.stopwaitsecs = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stopwaitsecs = numval;
 		}
 		else if (strcmp(key, "stopasgroup") == 0)
 		{
-			programlist->program.stopasgroup = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stopasgroup = boolval;
 		}
 		else if (strcmp(key, "killasgroup") == 0)
 		{
-			programlist->program.killasgroup = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.killasgroup = boolval;
 		}
 		else if (strcmp(key, "redirect_stderr") == 0)
 		{
-			programlist->program.redirect_stderr = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.redirect_stderr = boolval;
 		}
 		else if (strcmp(key, "user") == 0)
 		{
@@ -316,23 +348,48 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "stdout_logfile_maxbytes") == 0)
 		{
-			programlist->program.stdout_log.logfile_maxbytes = tobyte(value);
+			int byteval = tobyte(value);
+			if (byteval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stdout_log.logfile_maxbytes = byteval;
 		}
 		else if (strcmp(key, "stdout_logfile_backups") == 0)
 		{
-			programlist->program.stdout_log.logfile_backups = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stdout_log.logfile_backups = numval;
 		}
 		else if (strcmp(key, "stdout_capture_maxbytes") == 0)
 		{
-			programlist->program.stdout_log.capture_maxbytes = tobyte(value);
+			int byteval = tobyte(value);
+			if (byteval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stdout_log.capture_maxbytes = byteval;
 		}
 		else if (strcmp(key, "stdout_syslog") == 0)
 		{
-			programlist->program.stdout_log.syslog = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stdout_log.syslog = boolval;
 		}
 		else if (strcmp(key, "stdout_events_enabled") == 0)
 		{
-			programlist->program.stdout_log.events_enabled = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stdout_log.events_enabled = boolval;
 		}
 		else if (strcmp(key, "stderr_logfile") == 0)
 		{
@@ -340,23 +397,48 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else if (strcmp(key, "stderr_logfile_maxbytes") == 0)
 		{
-			programlist->program.stderr_log.logfile_maxbytes = tobyte(value);
+			int byteval = tobyte(value);
+			if (byteval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stderr_log.logfile_maxbytes = byteval;
 		}
 		else if (strcmp(key, "stderr_logfile_backups") == 0)
 		{
-			programlist->program.stderr_log.logfile_backups = atoi(value);
+			int numval = tonumber(value, 10);
+			if (numval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stderr_log.logfile_backups = numval;
 		}
 		else if (strcmp(key, "stderr_capture_maxbytes") == 0)
 		{
-			programlist->program.stderr_log.capture_maxbytes = tobyte(value);
+			int byteval = tobyte(value);
+			if (byteval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stderr_log.capture_maxbytes = byteval;
 		}
 		else if (strcmp(key, "stderr_syslog") == 0)
 		{
-			programlist->program.stderr_log.syslog = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stderr_log.syslog = boolval;
 		}
 		else if (strcmp(key, "stderr_events_enabled") == 0)
 		{
-			programlist->program.stderr_log.events_enabled = toboolean(value);
+			int boolval = toboolean(value);
+			if (boolval < 0)
+			{
+				return -1;
+			}
+			programlist->program.stderr_log.events_enabled = boolval;
 		}
 		else if (strcmp(key, "serverurl") == 0)
 		{
@@ -403,8 +485,8 @@ int parseline(char *line, char *pair[2])
 	// IF STARTS WITH COMMENT SIGN, SKIP
 	if (endofline(line[i]))
 	{
-		pair[0] = 0;
-		pair[1] = 0;
+		pair[0] = NULL;
+		pair[1] = NULL;
 		return 0;
 	}
 
@@ -418,12 +500,14 @@ int parseline(char *line, char *pair[2])
 		}
 		if (endofline(line[i]))
 		{
+			pair[0] = NULL;
+			pair[1] = NULL;
 			return 1;
 		}
 		line[i] = '\0';
 
 		pair[0] = &line[key];
-		pair[1] = 0;
+		pair[1] = NULL;
 		return 0;
 	}
 
@@ -440,6 +524,8 @@ int parseline(char *line, char *pair[2])
 	// FAIL IF THERE IS NO KEY-VALUE PAIR
 	if (endofline(line[i]))
 	{
+		pair[0] = NULL;
+		pair[1] = NULL;
 		return 1;
 	}
 	line[end + 1] = '\0';
@@ -472,19 +558,19 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 	int parsing_error = 0;
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
-	int linenumber = 0;
+	int linenumber = 1;
 	char *pair[2];
 	while (fgets(line, MAX_LINE_LENGTH, conffile) != NULL)
 	{
 		parsing_error |= parseline(line, pair);
 
-		if (pair[0] != 0 && pair[1] == 0)
+		if (pair[0] != NULL && pair[1] == NULL)
 		{
 			// CREATE NEW BLOCK
 			strcpy(block, pair[0]);
 			parsing_error |= initializeblock(configuration, block);
 		}
-		else if (pair[0] != 0 && pair[1] != 0)
+		else if (pair[0] != NULL && pair[1] != NULL)
 		{
 			// ADD NEW KEY-VALUE PAIR
 			parsing_error |= setconfigvariable(configuration, block, pair[0], pair[1]);
@@ -493,7 +579,14 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 		if (parsing_error)
 		{
 			// PARSING FAILED
-			usage("configuration file contains parsing errors:\n\t[line %d]: %s = %s", linenumber, pair[0], pair[1]);
+			if (pair[1] == NULL)
+			{
+				usage("configuration file contains parsing errors:\n\t[line %d]: %s", linenumber, line);
+			}
+			else
+			{
+				usage("configuration file contains parsing errors:\n\t[line %d]: %s = %s", linenumber, pair[0], pair[1]);
+			}
 			free(block);
 			free(line);
 			return NULL;

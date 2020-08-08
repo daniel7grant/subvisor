@@ -1,11 +1,13 @@
 #ifndef _CONFIG_H_INCLUDED_
 #define _CONFIG_H_INCLUDED_
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_LINE_LENGTH 1024
 
+#include "configtypes.h"
 #include "programconfig.h"
 #include "../logger/logger.h"
 

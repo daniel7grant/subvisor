@@ -18,10 +18,12 @@ build/process: build
 build/utils: build
 	mkdir -p build/utils
 
-build/subvisord: build src/subvisord.c build/config/arguments.o build/config/config.o build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.posix.o build/utils/utils.o build/utils/utils.o
+build/subvisord: build src/subvisord.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
+build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.posix.o build/utils/utils.o build/utils/utils.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o build/subvisord src/subvisord.c \
 		build/config/arguments.o \
 		build/config/config.o \
+		build/config/configtypes.o \
 		build/config/programconfig.o \
 		build/logger/logger.o \
 		build/process/process.o \
@@ -34,6 +36,9 @@ build/config/arguments.o: build/config src/config/arguments.c
 
 build/config/config.o: build/config src/config/config.c
 	$(CC) $(CFLAGS) -c -o build/config/config.o src/config/config.c
+
+build/config/configtypes.o: build/config src/config/configtypes.c
+	$(CC) $(CFLAGS) -c -o build/config/configtypes.o src/config/configtypes.c
 
 build/config/programconfig.o: build/config src/config/programconfig.c
 	$(CC) $(CFLAGS) -c -o build/config/programconfig.o src/config/programconfig.c
