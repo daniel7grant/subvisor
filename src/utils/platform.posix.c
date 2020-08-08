@@ -198,6 +198,7 @@ int openprocess(Process *process)
 	else if (process->pid > 0)
 	{
 		process->state = STARTING;
+		process->starttime = time(NULL);
 		close(stdoutfd[1]);
 		close(stderrfd[1]);
 		process->stdoutfd = stdoutfd[0];
@@ -241,40 +242,89 @@ int openprocess(Process *process)
 		return EXIT_FAILURE;
 	}
 }
+
 int readprocesses(Process processes[], int processcount)
 {
-	fd_set active_fd_set;
-	char buffer[4096];
-	struct timeval timeout = {.tv_sec = 1, .tv_usec = 0};
-	FD_ZERO(&active_fd_set);
-	for (int i = 0; i < processcount; i++)
+	struct pollfd fds[processcount * 2];
+	for (int i = 0; i < processcount; ++i)
 	{
-		FD_SET(processes[i].stdoutfd, &active_fd_set);
-		FD_SET(processes[i].stderrfd, &active_fd_set);
-	}
-
-	if (select(FD_SETSIZE, &active_fd_set, NULL, NULL, &timeout) < 0)
-	{
-		perror("select");
-		return EXIT_FAILURE;
-	}
-
-	for (int i = 0; i < FD_SETSIZE; ++i)
-	{
-		if (FD_ISSET(i, &active_fd_set))
+		if (processes[i].state == STARTING || processes[i].state == RUNNING || processes[i].state == STOPPING)
 		{
-			ssize_t count = read(i, buffer, 1024);
-			if (count == 0)
-			{
-				break;
-			}
-			if (count < 0)
-			{
-				return EXIT_FAILURE;
-			}
-			write(STDOUT_FILENO, buffer, count);
+			fds[2 * i].fd = processes[i].stdoutfd;
+			fds[2 * i].events = POLLIN;
+			fds[2 * i].revents = 0;
+			fds[2 * i + 1].fd = processes[i].stderrfd;
+			fds[2 * i + 1].events = POLLIN;
+			fds[2 * i + 1].revents = 0;
+		}
+		else
+		{
+			fds[2 * i].fd = -1;
+			fds[2 * i].events = POLLIN;
+			fds[2 * i].revents = 0;
+			fds[2 * i + 1].fd = -1;
+			fds[2 * i + 1].events = POLLIN;
+			fds[2 * i + 1].revents = 0;
 		}
 	}
+
+	char buffer[4096];
+
+	int pollret = poll(fds, processcount * 2, 1000);
+	if (pollret < 0)
+	{
+		return EXIT_FAILURE;
+	}
+	if (pollret > 0)
+	{
+		for (int i = 0; i < processcount; ++i)
+		{
+			if (fds[2 * i].revents & POLLIN)
+			{
+				int count = read(fds[2 * i].fd, buffer, 4096);
+				if (count == 0)
+				{
+					continue;
+				}
+				if (count < 0)
+				{
+					return EXIT_FAILURE;
+				}
+				write(STDOUT_FILENO, buffer, count);
+			}
+
+			if (fds[2 * i + 1].revents & POLLIN)
+			{
+				int count = read(fds[2 * i + 1].fd, buffer, 4096);
+				if (count == 0)
+				{
+					continue;
+				}
+				if (count < 0)
+				{
+					return EXIT_FAILURE;
+				}
+				write(STDOUT_FILENO, buffer, count);
+			}
+
+			if (fds[2 * i + 1].revents & POLLHUP)
+			{
+				int count = read(fds[2 * i + 1].fd, buffer, 4096);
+				if (count == 0)
+				{
+					continue;
+				}
+				if (count < 0)
+				{
+					return EXIT_FAILURE;
+				}
+				write(STDOUT_FILENO, buffer, count);
+			}
+
+			// TODO: handle hangups?
+		}
+	}
+
 	return EXIT_SUCCESS;
 }
 

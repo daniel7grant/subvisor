@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "../config/programconfig.h"
 
@@ -24,7 +25,7 @@ typedef struct Process
 	int pid;
 	ProgramConfiguration config;
 	PROCESS_STATE state;
-	FILE *pipe;
+	time_t starttime;
 	int retries;
 	int stdoutfd;
 	int stderrfd;
