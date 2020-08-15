@@ -674,34 +674,45 @@ int validateconfiguration(Configuration *configuration)
 	ProgramList *programlist = configuration->programs;
 	while (programlist != NULL)
 	{
-		ProgramConfiguration program = programlist->program;
-		if (strlen(program.command) == 0)
+		if (strlen(programlist->program.command) == 0)
 		{
-			usage("program section %s does not specify a command", program.process_name);
+			usage("program section %s does not specify a command", programlist->program.process_name);
 			return EXIT_FAILURE;
 		}
 
-		if (strlen(program.directory) > 0 && !checkaccess(program.directory, 0))
+		if (strlen(programlist->program.directory) > 0 && !checkaccess(programlist->program.directory, 0))
 		{
-			usage("could not access directory %s", program.directory);
+			usage("could not access directory %s", programlist->program.directory);
 			return EXIT_FAILURE;
 		}
 
-		if (strlen(program.user) > 0 && getuserid(program.user) < 0)
+		if (strlen(programlist->program.user) > 0 && getuserid(programlist->program.user) < 0)
 		{
-			usage("user %s does not exist", program.user);
+			usage("user %s does not exist", programlist->program.user);
 			return EXIT_FAILURE;
 		}
 
-		if (program.numprocs > 1 && strstr(program.process_name, "%(process_num)"))
+		if (programlist->program.numprocs > 1 && strstr(programlist->program.process_name, "%(process_num)"))
 		{
 			usage("%s", "%(process_num) must be present within process_name when numprocs > 1");
 			return EXIT_FAILURE;
 		}
 
-		if (program.stopasgroup && !program.killasgroup)
+		if (programlist->program.stopasgroup && !programlist->program.killasgroup)
 		{
 			usage("%s", "cannot set stopasgroup=true and killasgroup=false");
+			return EXIT_FAILURE;
+		}
+
+		if (openlogger(&programlist->program.stdout_log))
+		{
+			usage("could not write stdout log file %s", programlist->program.stdout_log.logfile);
+			return EXIT_FAILURE;
+		}
+
+		if (openlogger(&programlist->program.stderr_log))
+		{
+			usage("could not write stderr log file %s", programlist->program.stderr_log.logfile);
 			return EXIT_FAILURE;
 		}
 

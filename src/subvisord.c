@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 
 		for (int i = 0; i < processcount; ++i)
 		{
-			fprintf(stderr, "%s (%d): %d\n", processes[i].config->process_name, processes[i].pid, processes[i].state);
+			// fprintf(stderr, "%s (%d): %d\n", processes[i].config->process_name, processes[i].pid, processes[i].state);
 		}
 	}
 
@@ -114,6 +114,7 @@ int main(int argc, char **argv)
 		closeprocess(&processes[i]);
 	}
 
+	free(processes);
 	freeconfiguration(configuration);
 	return EXIT_SUCCESS;
 }

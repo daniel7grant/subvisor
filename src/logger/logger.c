@@ -29,8 +29,43 @@ int openlogger(Logger *logger)
 	return EXIT_SUCCESS;
 }
 
-void freelogger(Logger logger) {
-	if (logger.logwriter != NULL) {
+int formatlogger(Logger *logger, int loglevel, char *format, ...)
+{
+	if (logger->logwriter == NULL)
+	{
+		return EXIT_FAILURE;
+	}
+	if (logger->syslog)
+	{
+		return EXIT_SUCCESS;
+	}
+	va_list args;
+	va_start(args, format);
+	vfprintf(logger->logwriter, format, args);
+	va_end(args);
+	fflush(logger->logwriter);
+	return EXIT_SUCCESS;
+}
+
+int writelogger(Logger *logger, int loglevel, char *msg)
+{
+	if (logger->logwriter == NULL)
+	{
+		return EXIT_FAILURE;
+	}
+	if (logger->syslog)
+	{
+		return EXIT_SUCCESS;
+	}
+	fputs(msg, logger->logwriter);
+	fflush(logger->logwriter);
+	return EXIT_SUCCESS;
+}
+
+void freelogger(Logger logger)
+{
+	if (logger.logwriter != NULL)
+	{
 		fclose(logger.logwriter);
 	}
 }

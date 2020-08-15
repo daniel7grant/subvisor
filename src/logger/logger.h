@@ -4,6 +4,7 @@
 #define MAX_LINE_LENGTH 1024
 #define DEFAULT_LOG_MAXBYTES (50 * 1024 * 1024)
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,8 @@ typedef struct Logger
 
 extern Logger createlogger(const char *logfile);
 extern int openlogger(Logger *logger);
+extern int formatlogger(Logger *logger, int loglevel, char *format, ...);
+extern int writelogger(Logger *logger, int loglevel, char *msg);
 extern void freelogger(Logger logger);
 
 #endif

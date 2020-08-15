@@ -268,8 +268,6 @@ int readprocesses(Process processes[], int processcount)
 		}
 	}
 
-	char buffer[4096];
-
 	int pollret = poll(fds, processcount * 2, 1000);
 	if (pollret < 0)
 	{
@@ -281,6 +279,8 @@ int readprocesses(Process processes[], int processcount)
 		{
 			if (fds[2 * i].revents & POLLIN)
 			{
+				char *buffer = (char *)malloc(4096 * sizeof(char));
+				memset(buffer, 0, 4096);
 				int count = read(fds[2 * i].fd, buffer, 4096);
 				if (count == 0)
 				{
@@ -290,11 +290,14 @@ int readprocesses(Process processes[], int processcount)
 				{
 					return EXIT_FAILURE;
 				}
-				write(STDOUT_FILENO, buffer, count);
+				writelogger(&processes[i].config->stdout_log, 0, buffer);
+				free(buffer);
 			}
 
 			if (fds[2 * i + 1].revents & POLLIN)
 			{
+				char *buffer = (char *)malloc(4096 * sizeof(char));
+				memset(buffer, 0, 4096);
 				int count = read(fds[2 * i + 1].fd, buffer, 4096);
 				if (count == 0)
 				{
@@ -304,21 +307,8 @@ int readprocesses(Process processes[], int processcount)
 				{
 					return EXIT_FAILURE;
 				}
-				write(STDOUT_FILENO, buffer, count);
-			}
-
-			if (fds[2 * i + 1].revents & POLLHUP)
-			{
-				int count = read(fds[2 * i + 1].fd, buffer, 4096);
-				if (count == 0)
-				{
-					continue;
-				}
-				if (count < 0)
-				{
-					return EXIT_FAILURE;
-				}
-				write(STDOUT_FILENO, buffer, count);
+				writelogger(&processes[i].config->stderr_log, 0, buffer);
+				free(buffer);
 			}
 
 			// TODO: handle hangups?
@@ -381,6 +371,7 @@ void childhandler(int sig)
 		}
 		else if (WIFSIGNALED(status))
 		{
+			// TODO: autorestart this?
 			if (process->state == STARTING || process->state == RUNNING || process->state == FATAL)
 			{
 				process->state = STOPPING;
