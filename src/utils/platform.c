@@ -9,10 +9,14 @@ const char *defaultconfigurationfiles[] = {
 	"./supervisord.conf",
 	"./etc/subvisord.conf",
 	"./etc/supervisord.conf",
+	"/etc/subvisord.conf",
+	"/etc/supervisord.conf",
+	"/etc/subvisor/subvisord.conf",
+	"/etc/supervisor/supervisord.conf",
 };
 int defaultconfigurationcount = sizeof(defaultconfigurationfiles) / sizeof(defaultconfigurationfiles[0]);
 
-const char pathseparator = '\\';
+const char pathseparator = '/';
 
 char *joinpath(char *dir, char *filename)
 {
@@ -33,7 +37,7 @@ char *getcurrentdirfile(char *filename)
 {
 	char *cwd = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	memset(cwd, 0, MAX_LINE_LENGTH);
-	_getcwd(cwd, MAX_LINE_LENGTH);
+	getcwd(cwd, MAX_LINE_LENGTH);
 	if (filename != NULL)
 	{
 		joinpath(cwd, filename);
@@ -43,18 +47,18 @@ char *getcurrentdirfile(char *filename)
 
 int getcurrentuserid()
 {
-	return 0;
+	return getuid();
 }
 
 int getuserid(const char *name)
 {
-	// TODO: warning, it translates to a noop in Windows
-	return 0;
+	struct passwd *user = getpwnam(name);
+	return user != NULL ? (int)user->pw_uid : -1;
 }
 
 int checkaccess(const char *path, int writeable)
 {
-	return _access(path, writeable ? 6 : 4) == 0;
+	return access(path, writeable ? (W_OK | R_OK) : R_OK) == 0;
 }
 
 const char *gettempdir()
@@ -63,10 +67,9 @@ const char *gettempdir()
 		getenv("TMPDIR"),
 		getenv("TEMP"),
 		getenv("TMP"),
-		"C:\\TEMP",
-		"C:\\TMP"
-		"\\TEMP",
-		"\\TMP"};
+		"/tmp",
+		"/var/tmp",
+		"/usr/tmp"};
 	int tmpdirslength = sizeof(tmpdirs) / sizeof(tmpdirs[0]);
 	int i = 0;
 	while (i < tmpdirslength && (tmpdirs[i] == NULL || !checkaccess(tmpdirs[i], 0)))
@@ -80,38 +83,7 @@ const char *gettempdir()
 	return getcurrentdirfile(NULL);
 }
 
-int prepareparent(Configuration *configuration)
-{
-	return 0;
-}
-
-int openprocess(Process *process)
-{
-	return 0;
-}
-
-int readprocesses(Process processes[], int processcount)
-{
-	return 0;
-}
-
-int closeprocess(Process *process)
-{
-	return 0;
-}
-
 int testsyslog()
 {
-	// Windows doesn't support syslog
-	return 0;
-}
-
-int handlesignals()
-{
-	return 0;
-}
-
-int handleprocesssignals()
-{
-	return 0;
+	return 1;
 }
