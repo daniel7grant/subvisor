@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <wordexp.h>
 
+#include "../utils/platform.h"
 #include "../config/config.h"
 
 typedef enum PROCESS_STATE

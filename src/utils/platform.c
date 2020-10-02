@@ -82,8 +82,3 @@ const char *gettempdir()
 	}
 	return getcurrentdirfile(NULL);
 }
-
-int testsyslog()
-{
-	return 1;
-}

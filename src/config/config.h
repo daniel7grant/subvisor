@@ -9,6 +9,7 @@
 
 #include "configtypes.h"
 #include "programconfig.h"
+#include "../utils/platform.h"
 #include "../logger/logger.h"
 
 typedef struct Configuration

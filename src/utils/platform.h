@@ -19,6 +19,5 @@ extern int getuserid(const char *name);
 extern int getcurrentuserid();
 extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
-extern int testsyslog();
 
 #endif

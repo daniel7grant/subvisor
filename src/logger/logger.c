@@ -19,7 +19,7 @@ int openlogger(Logger *logger)
 {
 	if (logger->syslog)
 	{
-		return testsyslog() ? EXIT_SUCCESS : EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 	logger->logwriter = fopen(logger->logfile, "w");
 	if (logger->logwriter == NULL)
