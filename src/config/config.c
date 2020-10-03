@@ -18,6 +18,7 @@ int initializeblock(Configuration *configuration, char *block)
 	{
 		char *cwdpid = getcurrentdirfile("supervisord.pid");
 
+		configuration->subvisord = 1;
 		strcpy(configuration->pidfile, cwdpid);
 		configuration->nodaemon = 0;
 		configuration->minfds = 1024;
@@ -627,8 +628,11 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 
 int validateconfiguration(Configuration *configuration)
 {
-	// TODO: check existence of supervisord block (do we need this?)
-	// usage("%s", ".ini file does not include supervisord section");
+	if (!configuration->subvisord)
+	{
+		usage("%s", ".ini file does not include supervisord section");
+		return EXIT_FAILURE;
+	}
 
 	if (openlogger(&configuration->log))
 	{

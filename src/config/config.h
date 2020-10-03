@@ -16,6 +16,7 @@ typedef struct Configuration
 {
 	Logger log;
 	char pidfile[MAX_LINE_LENGTH];
+	int subvisord;
 	int nodaemon;
 	int minfds;
 	int minprocs;
