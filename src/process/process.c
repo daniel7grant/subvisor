@@ -18,18 +18,6 @@ Process *findprocess(int pid)
 	return NULL;
 }
 
-// bubble sort
-// 3 1 4 2
-// i j    	swap
-// 1 3 4 2
-// i   j    noswap
-// i     j  noswap
-//   i j    noswap
-//   i   j  swap
-// 1 2 4 3
-//     i j  swap
-// 1 2 3 4
-
 void prioritizeprocesses()
 {
 	Process temp;
