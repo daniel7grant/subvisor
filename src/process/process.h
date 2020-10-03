@@ -45,6 +45,7 @@ extern Process *processes;
 extern int processcount;
 
 extern Process *findprocess(int pid);
+extern void prioritizeprocesses();
 extern int shouldrestart(Process *process, int code);
 
 extern int prepareparent(Configuration *configuration);

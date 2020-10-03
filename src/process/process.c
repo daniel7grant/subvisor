@@ -18,13 +18,41 @@ Process *findprocess(int pid)
 	return NULL;
 }
 
+// bubble sort
+// 3 1 4 2
+// i j    	swap
+// 1 3 4 2
+// i   j    noswap
+// i     j  noswap
+//   i j    noswap
+//   i   j  swap
+// 1 2 4 3
+//     i j  swap
+// 1 2 3 4
+
+void prioritizeprocesses()
+{
+	Process temp;
+	for (int i = 0; i < processcount - 1; i++)
+	{
+		for (int j = i + 1; j < processcount; j++)
+		{
+			if (processes[i].config->priority > processes[j].config->priority)
+			{
+				temp = processes[i];
+				processes[i] = processes[j];
+				processes[j] = temp;
+			}
+		}
+	}
+}
+
 int shouldrestart(Process *process, int code)
 {
 	return process->config->autorestart == UNEXPECTED
 			   ? process->config->exitcodes != code
 			   : process->config->autorestart;
 }
-
 
 int prepareparent(Configuration *configuration)
 {
@@ -262,7 +290,6 @@ int closeprocess(Process *process)
 	waitpid(-1, &status, 0);
 	return status;
 }
-
 
 void handler(int sig)
 {

@@ -72,7 +72,8 @@ int main(int argc, char **argv)
 		processes[i].retries = 0;
 	}
 
-	// TODO: order by priority
+    prioritizeprocesses();
+
 	// TODO: start multiple processes
 	for (int i = 0; i < processcount; ++i)
 	{
