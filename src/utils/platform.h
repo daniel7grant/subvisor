@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #define MAX_LINE_LENGTH 1024
@@ -19,5 +21,6 @@ extern int getuserid(const char *name);
 extern int getcurrentuserid();
 extern int checkaccess(const char *path, int writeable);
 extern const char *gettempdir();
+extern long long int getms();
 
 #endif

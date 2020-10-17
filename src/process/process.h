@@ -35,7 +35,7 @@ typedef struct Process
 	int pid;
 	ProgramConfiguration *config;
 	PROCESS_STATE state;
-	time_t starttime;
+	long long int starttime;
 	int retries;
 	int stdoutfd;
 	int stderrfd;
@@ -47,6 +47,7 @@ extern int processcount;
 extern Process *findprocess(int pid);
 extern void prioritizeprocesses();
 extern int shouldrestart(Process *process, int code);
+extern int hasstarted(Process *process);
 
 extern int prepareparent(Configuration *configuration);
 extern int openprocess(Process *process);

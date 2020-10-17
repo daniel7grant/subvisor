@@ -82,3 +82,23 @@ const char *gettempdir()
 	}
 	return getcurrentdirfile(NULL);
 }
+
+long long int getms()
+{
+#ifdef _POSIX_MONOTONIC_CLOCK
+	struct timespec ts;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
+	{
+		return (long long int)(ts.tv_sec * 1000 + ts.tv_nsec / 1e6);
+	}
+#else
+	struct timeval tv;
+
+	if (gettimeofday(&tv, NULL) == 0)
+	{
+		return (long long int)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+	}
+#endif
+	return 0;
+}

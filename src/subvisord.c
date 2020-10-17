@@ -62,7 +62,6 @@ int main(int argc, char **argv)
 
 	processcount = countprogramlist(configuration->programs);
 	processes = (Process *)malloc(processcount * sizeof(Process));
-	printf("%ld", sizeof(Process));
 	ProgramList *tip = configuration->programs;
 	for (int i = 0; i < processcount; ++i, tip = tip->next)
 	{
@@ -83,14 +82,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// TODO: time may be too imprecise
-	time_t now;
 	while (readprocesses(processes, processcount) == 0)
 	{
-		time(&now);
 		for (int i = 0; i < processcount; ++i)
 		{
-			if (processes[i].state == STARTING && difftime(now, processes[i].starttime) > processes[i].config->startsecs)
+			if (processes[i].state == STARTING && hasstarted(&processes[i]))
 			{
 				processes[i].state = RUNNING;
 			}
@@ -104,9 +100,10 @@ int main(int argc, char **argv)
 			}
 		}
 
+		system("clear");
 		for (int i = 0; i < processcount; ++i)
 		{
-			// fprintf(stderr, "%s (%d): %d\n", processes[i].config->process_name, processes[i].pid, processes[i].state);
+			fprintf(stderr, "%s (%d): %d\n", processes[i].config->process_name, processes[i].pid, processes[i].state);
 		}
 	}
 

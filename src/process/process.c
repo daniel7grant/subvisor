@@ -42,6 +42,11 @@ int shouldrestart(Process *process, int code)
 			   : process->config->autorestart;
 }
 
+int hasstarted(Process *process)
+{
+	return (getms() - process->starttime) > process->config->startsecs * 1000;
+}
+
 int prepareparent(Configuration *configuration)
 {
 	if (!configuration->nodaemon)
@@ -151,8 +156,8 @@ int openprocess(Process *process)
 	}
 	else if (process->pid > 0)
 	{
-		process->state = STARTING;
-		process->starttime = time(NULL);
+		process->state = process->config->startsecs > 0 ? STARTING : RUNNING;
+		process->starttime = getms();
 		close(stdoutfd[1]);
 		close(stderrfd[1]);
 		process->stdoutfd = stdoutfd[0];
@@ -162,7 +167,7 @@ int openprocess(Process *process)
 	}
 	else
 	{
-		// TODO: open separate processgroup for process? (setpgid)
+		setpgid(0, 0);
 
 		close(stdoutfd[0]);
 		close(stderrfd[0]);
@@ -197,9 +202,8 @@ int openprocess(Process *process)
 	}
 }
 
-int readprocesses(Process processes[], int processcount)
+void initializepoll(struct pollfd *fds, Process processes[], int processcount)
 {
-	struct pollfd fds[processcount * 2];
 	for (int i = 0; i < processcount; ++i)
 	{
 		if (processes[i].state == STARTING || processes[i].state == RUNNING || processes[i].state == STOPPING)
@@ -221,51 +225,62 @@ int readprocesses(Process processes[], int processcount)
 			fds[2 * i + 1].revents = 0;
 		}
 	}
+}
 
-	int pollret = poll(fds, processcount * 2, 1000);
-	if (pollret < 0)
+int readprocesses(Process processes[], int processcount)
+{
+	struct pollfd fds[processcount * 2];
+
+	long long int remainingms, startms = getms();
+	while ((remainingms = 1000 - (getms() - startms)) > 0)
 	{
-		return EXIT_FAILURE;
-	}
-	if (pollret > 0)
-	{
-		for (int i = 0; i < processcount; ++i)
+		initializepoll(fds, processes, processcount);
+
+		int pollret = poll(fds, processcount * 2, remainingms);
+		if (pollret < 0)
 		{
-			if (fds[2 * i].revents & POLLIN)
+			return EXIT_FAILURE;
+		}
+		if (pollret > 0)
+		{
+			for (int i = 0; i < processcount; ++i)
 			{
-				char *buffer = (char *)malloc(4096 * sizeof(char));
-				memset(buffer, 0, 4096);
-				int count = read(fds[2 * i].fd, buffer, 4096);
-				if (count == 0)
+				if (fds[2 * i].revents & POLLIN)
 				{
-					continue;
+					char *buffer = (char *)malloc(4096 * sizeof(char));
+					memset(buffer, 0, 4096);
+					int count = read(fds[2 * i].fd, buffer, 4096);
+					if (count == 0)
+					{
+						continue;
+					}
+					if (count < 0)
+					{
+						return EXIT_FAILURE;
+					}
+					writelogger(&processes[i].config->stdout_log, 0, buffer);
+					free(buffer);
 				}
-				if (count < 0)
-				{
-					return EXIT_FAILURE;
-				}
-				writelogger(&processes[i].config->stdout_log, 0, buffer);
-				free(buffer);
-			}
 
-			if (fds[2 * i + 1].revents & POLLIN)
-			{
-				char *buffer = (char *)malloc(4096 * sizeof(char));
-				memset(buffer, 0, 4096);
-				int count = read(fds[2 * i + 1].fd, buffer, 4096);
-				if (count == 0)
+				if (fds[2 * i + 1].revents & POLLIN)
 				{
-					continue;
+					char *buffer = (char *)malloc(4096 * sizeof(char));
+					memset(buffer, 0, 4096);
+					int count = read(fds[2 * i + 1].fd, buffer, 4096);
+					if (count == 0)
+					{
+						continue;
+					}
+					if (count < 0)
+					{
+						return EXIT_FAILURE;
+					}
+					writelogger(&processes[i].config->stderr_log, 0, buffer);
+					free(buffer);
 				}
-				if (count < 0)
-				{
-					return EXIT_FAILURE;
-				}
-				writelogger(&processes[i].config->stderr_log, 0, buffer);
-				free(buffer);
-			}
 
-			// TODO: handle hangups?
+				// TODO: handle hangups?
+			}
 		}
 	}
 
