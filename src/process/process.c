@@ -320,6 +320,11 @@ void childhandler(int sig)
 	while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
 	{
 		Process *process = findprocess(pid);
+		if (process == NULL)
+		{
+			// TODO: zombie is reaped, log it
+			return;
+		}
 		if (WIFEXITED(status))
 		{
 			if (shouldrestart(process, WEXITSTATUS(status)) && ++process->retries <= process->config->startretries)
