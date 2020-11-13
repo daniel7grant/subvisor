@@ -16,21 +16,18 @@ int main(int argc, char **argv)
 
 	arg0 = argv[0];
 
-	ParsedArguments arguments;
-	arguments.configurationfile = NULL;
-	memset(arguments.configurationlist, 0, MAX_ARGUMENTS * sizeof(char *));
-	arguments.verbosity = 1;
-	if (parsearguments(&arguments, argc, argv))
+	ParsedArguments *arguments = parsearguments(argc, argv);
+	if (arguments == NULL)
 	{
 		return EXIT_FAILURE;
 	}
 
-	FILE *configurationfile = checkfiles(arguments.configurationfile, defaultconfigurationfiles, defaultconfigurationcount);
+	FILE *configurationfile = checkfiles(arguments->configurationfile, defaultconfigurationfiles, defaultconfigurationcount);
 	if (configurationfile == NULL)
 	{
-		if (arguments.configurationfile != NULL)
+		if (arguments->configurationfile != NULL)
 		{
-			usage("could not find config file %s.", arguments.configurationfile);
+			usage("could not find config file %s.", arguments->configurationfile);
 		}
 		else
 		{
@@ -42,7 +39,7 @@ int main(int argc, char **argv)
 
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 	configuration->programs = NULL;
-	if (parsefromfile(configuration, configurationfile, arguments.configurationfile, 0))
+	if (parsefromfile(configuration, configurationfile, arguments->configurationfile, 0))
 	{
 		return EXIT_FAILURE;
 	}
@@ -57,12 +54,11 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	if (parsefromargs(configuration, arguments.configurationlist))
+	if (parsefromargs(configuration, arguments->configurationlist))
 	{
 		return EXIT_FAILURE;
 	}
 	globfree(&configuration->included_files);
-	freearguments(arguments);
 	fclose(configurationfile);
 
 	if (validateconfiguration(configuration))
@@ -70,6 +66,11 @@ int main(int argc, char **argv)
 		freeconfiguration(configuration);
 		return EXIT_FAILURE;
 	}
+
+	if (arguments->dryrun) {
+		return EXIT_SUCCESS;
+	}
+	freearguments(arguments);
 
 	if (prepareparent(configuration))
 	{

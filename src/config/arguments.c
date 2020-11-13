@@ -20,6 +20,7 @@ const Option options[] = {
 	{"minprocs", 0, "NUM", "the minimum number of processes available for start success"},
 	{"help", 'h', 0, "show this help"},
 	{"version", 'V', 0, "print program version"},
+	{"dry-run", 'T', 0, "test configuration file (dry-run)"},
 };
 
 Option nullopt = {0};
@@ -85,10 +86,15 @@ void handleoption(ParsedArguments *arguments, Option opt, char *arg)
 		puts("\nFor more information check out the documentation at https://github.com/daniel7grant/subvisor.");
 		exit(0);
 	}
-	case 'v':
+	case 'V':
 	{
 		printf("%s\n", SUBVISORD_VERSION);
 		exit(0);
+	}
+	case 'T':
+	{
+		arguments->dryrun = 1;
+		break;
 	}
 	case 'c':
 	{
@@ -115,8 +121,14 @@ void handleoption(ParsedArguments *arguments, Option opt, char *arg)
 	}
 }
 
-int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
+ParsedArguments *parsearguments(int argc, char *argv[])
 {
+	ParsedArguments *arguments = (ParsedArguments *)malloc(sizeof(ParsedArguments));
+	arguments->configurationfile = NULL;
+	memset(arguments->configurationlist, 0, MAX_ARGUMENTS * sizeof(char *));
+	arguments->verbosity = 1;
+	arguments->dryrun = 0;
+
 	char *current, *next;
 	for (int i = 1; i < argc; ++i)
 	{
@@ -130,7 +142,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 				if (strlen(current) == 2)
 				{
 					// end of arguments
-					return EXIT_SUCCESS;
+					return arguments;
 				}
 				next = strchr(current, '=');
 				if (next != NULL)
@@ -144,7 +156,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 				if (opt.name == NULL)
 				{
 					usage("option %s not recognized", current);
-					return EXIT_FAILURE;
+					return NULL;
 				}
 				if (opt.args != NULL)
 				{
@@ -152,7 +164,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 					if (next == NULL)
 					{
 						usage("option %s requires argument", current);
-						return EXIT_FAILURE;
+						return NULL;
 					}
 					handleoption(arguments, opt, next);
 					// skip argument
@@ -173,7 +185,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 					if (opt.key != current[j])
 					{
 						usage("option %s not recognized", current);
-						return EXIT_FAILURE;
+						return NULL;
 					}
 					if (opt.args == NULL)
 					{
@@ -192,7 +204,7 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 						if (next == NULL)
 						{
 							usage("option %s requires argument", current);
-							return EXIT_FAILURE;
+							return NULL;
 						}
 						// skip argument
 						++i;
@@ -206,20 +218,20 @@ int parsearguments(ParsedArguments *arguments, int argc, char *argv[])
 		{
 			usage("positional arguments are not supported: %s", current);
 			// We can use that our program should not have arguments
-			return 1;
+			return NULL;
 		}
 	}
-	return EXIT_SUCCESS;
+	return arguments;
 }
 
-void freearguments(ParsedArguments arguments)
+void freearguments(ParsedArguments *arguments)
 {
-	if (arguments.configurationfile != NULL)
+	if (arguments->configurationfile != NULL)
 	{
-		free(arguments.configurationfile);
+		free(arguments->configurationfile);
 	}
-	for (int i = 0; arguments.configurationlist[i] != NULL; ++i)
+	for (int i = 0; arguments->configurationlist[i] != NULL; ++i)
 	{
-		free(arguments.configurationlist[i]);
+		free(arguments->configurationlist[i]);
 	}
 }

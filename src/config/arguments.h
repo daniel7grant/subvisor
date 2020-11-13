@@ -22,12 +22,13 @@ typedef struct ParsedArguments {
 	char *configurationlist[MAX_ARGUMENTS];
 	char *configurationfile;
 	int verbosity;
+	int dryrun;
 } ParsedArguments;
 
 extern const Option options[];
 
-int parsearguments(ParsedArguments* arguments, int argc, char *argv[]);
+ParsedArguments *parsearguments(int argc, char *argv[]);
 
-void freearguments(ParsedArguments arguments);
+void freearguments(ParsedArguments *arguments);
 
 #endif
