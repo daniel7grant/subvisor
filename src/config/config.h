@@ -2,6 +2,7 @@
 #define _CONFIG_H_INCLUDED_
 
 #include <errno.h>
+#include <glob.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -28,10 +29,13 @@ typedef struct Configuration
 	char childlogdir[MAX_LINE_LENGTH];
 	int strip_ansi;
 	char environment[MAX_LINE_LENGTH];
+	glob_t included_files;
 	ProgramList *programs;
 } Configuration;
 
 extern Configuration *readfromfile(FILE *filename, char **arguments);
+int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included);
+int parsefromargs(Configuration *configuration, char **arguments);
 extern int validateconfiguration(Configuration *configuration);
 extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern void freeconfiguration(Configuration *configuration);

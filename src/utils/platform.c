@@ -61,6 +61,16 @@ int checkaccess(const char *path, int writeable)
 	return access(path, writeable ? (W_OK | R_OK) : R_OK) == 0;
 }
 
+int isdir(const char *path)
+{
+	struct stat statbuf;
+	if (stat(path, &statbuf))
+	{
+		return 0;
+	}
+	return S_ISDIR(statbuf.st_mode);
+}
+
 const char *gettempdir()
 {
 	const char *tmpdirs[] = {

@@ -105,3 +105,25 @@ PROGRAM_AUTORESTART toautorestart(char *var)
 	}
 	return strcmp(var, "unexpected") == 0 ? UNEXPECTED : -1;
 }
+
+glob_t toglob(char *value)
+{
+	glob_t globbuf;
+	char *lastvalue = value;
+	char original = value[0];
+	for (int i = 0; original != 0; ++i)
+	{
+		original = value[i];
+		if (value[i] == 32 || value[i] == 0)
+		{
+			value[i] = 0;
+			if (strlen(lastvalue))
+			{
+				glob(lastvalue, ((lastvalue != value) ? GLOB_APPEND : 0) | GLOB_MARK, NULL, &globbuf);
+			}
+			lastvalue = &value[i] + 1;
+			value[i] = original;
+		}
+	}
+	return globbuf;
+}

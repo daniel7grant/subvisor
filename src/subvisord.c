@@ -40,14 +40,30 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	Configuration *configuration = readfromfile(configurationfile, arguments.configurationlist);
-	freearguments(arguments);
-	fclose(configurationfile);
-
-	if (!configuration)
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+	if (parsefromfile(configuration, configurationfile, arguments.configurationfile, 0))
 	{
 		return EXIT_FAILURE;
 	}
+	for (unsigned long int i = 0; i < configuration->included_files.gl_pathc; ++i)
+	{
+		if (!isdir(configuration->included_files.gl_pathv[i]))
+		{
+			FILE *includedfile = fopen(configuration->included_files.gl_pathv[i], "r");
+			if (parsefromfile(configuration, includedfile, configuration->included_files.gl_pathv[i], 1))
+			{
+				return EXIT_FAILURE;
+			}
+		}
+	}
+	if (parsefromargs(configuration, arguments.configurationlist))
+	{
+		return EXIT_FAILURE;
+	}
+	globfree(&configuration->included_files);
+	freearguments(arguments);
+	fclose(configurationfile);
 
 	if (validateconfiguration(configuration))
 	{
@@ -71,7 +87,7 @@ int main(int argc, char **argv)
 		processes[i].retries = 0;
 	}
 
-    prioritizeprocesses();
+	prioritizeprocesses();
 
 	// TODO: start multiple processes
 	for (int i = 0; i < processcount; ++i)

@@ -12,7 +12,7 @@ int whitespace(char c)
 	return c == ' ' || c == '\r' || c == '\n' || c == '\t';
 }
 
-int initializeblock(Configuration *configuration, char *block)
+int initializeblock(Configuration *configuration, char *block, int included)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
@@ -44,7 +44,10 @@ int initializeblock(Configuration *configuration, char *block)
 	}
 	else if (strcmp(block, "include") == 0)
 	{
-		// TODO: Add inclusion of files
+		if (included) {
+			// CAN'T INCLUDE IN INCLUDED FILES
+			return 2;
+		}
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
 	{
@@ -192,7 +195,14 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 	}
 	else if (strcmp(block, "include") == 0)
 	{
-		// TODO: Add inclusion of files
+		if (strcmp(key, "files") == 0)
+		{
+			configuration->included_files = toglob(value);
+		}
+		else
+		{
+			return 1;
+		}
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
 	{
@@ -551,11 +561,8 @@ int parseline(char *line, char *pair[2])
 	return 0;
 }
 
-Configuration *readfromfile(FILE *conffile, char **arguments)
+int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included)
 {
-	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
-	configuration->programs = NULL;
-
 	int parsing_error = 0;
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
@@ -569,7 +576,7 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 		{
 			// CREATE NEW BLOCK
 			strcpy(block, pair[0]);
-			parsing_error |= initializeblock(configuration, block);
+			parsing_error |= initializeblock(configuration, block, included);
 		}
 		else if (pair[0] != NULL && pair[1] != NULL)
 		{
@@ -590,14 +597,23 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 			}
 			free(block);
 			free(line);
-			return NULL;
+			return 1;
 		}
 
 		++linenumber;
 	}
 
+	free(block);
+	free(line);
+
+	return 0;
+}
+
+int parsefromargs(Configuration *configuration, char **arguments)
+{
+	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+
 	// MERGE WITH ARGUMENTS FROM THE COMMAND LINE
-	strcpy(block, "subvisord");
 	int k = 0;
 	while (arguments[k] != NULL)
 	{
@@ -606,24 +622,21 @@ Configuration *readfromfile(FILE *conffile, char **arguments)
 		if (parseline(line, pair))
 		{
 			// CONFIGURATION FAILED
-			usage("command line configuration failed:\n\t[line %d]: %s", linenumber, line);
-			free(block);
+			usage("command line configuration failed:\n\t%s", line);
 			free(line);
-			return NULL;
+			return 1;
 		}
 
 		if (pair[0] != 0 && pair[1] != 0)
 		{
 			// ADD NEW KEY-VALUE PAIR
-			setconfigvariable(configuration, block, pair[0], pair[1]);
+			setconfigvariable(configuration, "subvisord", pair[0], pair[1]);
 		}
 		++k;
 	}
 
-	free(block);
 	free(line);
-
-	return configuration;
+	return 0;
 }
 
 int validateconfiguration(Configuration *configuration)
