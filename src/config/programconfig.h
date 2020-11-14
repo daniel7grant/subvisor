@@ -1,9 +1,8 @@
 #ifndef _PROGRAMCONFIG_H_INCLUDED_
 #define _PROGRAMCONFIG_H_INCLUDED_
 
-#define MAX_LINE_LENGTH 1024
-
 #include "../logger/logger.h"
+#include "../utils/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_LINE_LENGTH 1024
-
 #include "configtypes.h"
 #include "programconfig.h"
 #include "../utils/platform.h"

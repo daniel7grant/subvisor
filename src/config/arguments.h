@@ -7,10 +7,6 @@
 
 #include "../utils/utils.h"
 
-#define SUBVISORD_VERSION "0.0.0"
-#define MAX_ARGUMENTS 100
-#define MAX_LINE_LENGTH 1024
-
 typedef struct Option {
 	const char *name;
 	char key;

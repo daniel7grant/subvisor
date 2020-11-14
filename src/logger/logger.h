@@ -1,13 +1,13 @@
 #ifndef _LOGGER_H_INCLUDED_
 #define _LOGGER_H_INCLUDED_
 
-#define MAX_LINE_LENGTH 1024
-#define DEFAULT_LOG_MAXBYTES (50 * 1024 * 1024)
 
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "../utils/utils.h"
 
 typedef enum LOGLEVEL
 {

@@ -13,7 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MAX_LINE_LENGTH 1024
+#include "utils.h"
 
 extern const char *defaultconfigurationfiles[];
 extern int defaultconfigurationcount;
