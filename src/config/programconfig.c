@@ -13,7 +13,8 @@ ProgramConfiguration createdefaultprogramconfig(char *name)
 	program.autorestart = UNEXPECTED;
 	program.startsecs = 1;
 	program.startretries = 3;
-	program.exitcodes = 0;
+	memset(program.exitcodes, 0, MAX_EXITCODES * sizeof(short));
+	program.exitcodes[0] = 1;
 	program.stopsignal = 0;
 	program.stopwaitsecs = 10;
 	program.stopasgroup = 0;

@@ -29,13 +29,13 @@ typedef struct ProgramConfiguration
 	PROGRAM_AUTORESTART autorestart;
 	int startsecs;
 	int startretries;
-	int exitcodes;
+	short exitcodes[MAX_EXITCODES];
 	int stopsignal;
 	int stopwaitsecs;
 	int stopasgroup;
 	int killasgroup;
 	int redirect_stderr;
-	char user[MAX_LINE_LENGTH];
+	char user[MAX_USERNAME_LENGTH];
 	char environment[MAX_LINE_LENGTH];
 } ProgramConfiguration;
 
@@ -45,7 +45,7 @@ typedef struct ProgramList
 	struct ProgramList *next;
 } ProgramList;
 
-extern ProgramConfiguration createdefaultprogramconfig();
+extern ProgramConfiguration createdefaultprogramconfig(char *name);
 
 extern ProgramList *pushtoprogramlist(ProgramList *programlist, ProgramConfiguration config);
 extern ProgramList *peekprogramlist(ProgramList *programlist);

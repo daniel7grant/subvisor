@@ -289,12 +289,12 @@ PARSE_RETURN setconfigvariable(Configuration *configuration, char *block, char *
 		}
 		else if (strcmp(key, "exitcodes") == 0)
 		{
-			int exitcodes = toexitcode(value);
-			if (exitcodes < 0)
+			short *exitcodes = toexitcode(value);
+			if (exitcodes == NULL)
 			{
 				return PARSE_ERROR_EXITCODE;
 			}
-			programlist->program.exitcodes = exitcodes;
+			memcpy(programlist->program.exitcodes, exitcodes, MAX_EXITCODES * sizeof(short));
 		}
 		else if (strcmp(key, "stopsignal") == 0)
 		{

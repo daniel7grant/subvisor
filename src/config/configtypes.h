@@ -12,7 +12,7 @@ extern int toboolean(char *var);
 extern int tonumber(char *var, int base);
 extern long long int tobyte(char *var);
 extern LOGLEVEL tologlevel(char *var);
-extern int toexitcode(char *var);
+extern short *toexitcode(char *var);
 extern PROGRAM_AUTORESTART toautorestart(char *var);
 extern glob_t toglob(char *var);
 

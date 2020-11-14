@@ -7,9 +7,12 @@
 #include <stdarg.h>
 
 #define SUBVISORD_VERSION "0.0.0"
+
 #define DEFAULT_LOG_MAXBYTES (50 * 1024 * 1024)
-#define MAX_LINE_LENGTH 1024
 #define MAX_ARGUMENTS 100
+#define MAX_EXITCODES 256
+#define MAX_LINE_LENGTH 1024
+#define MAX_USERNAME_LENGTH 32
 
 extern char *arg0;
 

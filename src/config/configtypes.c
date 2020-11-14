@@ -90,10 +90,30 @@ LOGLEVEL tologlevel(char *var)
 	return -1;
 }
 
-// TODO: this should strings to exit code matches
-int toexitcode(char *var)
+short *toexitcode(char *var)
 {
-	return atoi(var);
+	short *exitcodes = (short *)malloc(MAX_EXITCODES * sizeof(short));
+	memset(exitcodes, 0, MAX_EXITCODES * sizeof(short));
+	short code;
+	char *lastvalue = var;
+	char original = var[0];
+	for (int i = 0; original != 0; ++i)
+	{
+		original = var[i];
+		if (var[i] == ',' || var[i] == 0)
+		{
+			var[i] = 0;
+			code = tonumber(lastvalue, 10);
+			if (code == -1)
+			{
+				return NULL;
+			}
+			exitcodes[code] = 1;
+			lastvalue = &var[i] + 1;
+			var[i] = original;
+		}
+	}
+	return exitcodes;
 }
 
 PROGRAM_AUTORESTART toautorestart(char *var)

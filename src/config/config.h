@@ -36,7 +36,7 @@ typedef struct Configuration
 	int minfds;
 	int minprocs;
 	int umask;
-	char user[MAX_LINE_LENGTH];
+	char user[MAX_USERNAME_LENGTH];
 	char identifier[MAX_LINE_LENGTH];
 	char directory[MAX_LINE_LENGTH];
 	int nocleanup;
