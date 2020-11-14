@@ -234,4 +234,5 @@ void freearguments(ParsedArguments *arguments)
 	{
 		free(arguments->configurationlist[i]);
 	}
+	free(arguments);
 }

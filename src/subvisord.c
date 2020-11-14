@@ -41,8 +41,13 @@ int main(int argc, char **argv)
 	configuration->programs = NULL;
 	if (parsefromfile(configuration, configurationfile, arguments->configurationfile, 0))
 	{
+		fclose(configurationfile);
+		globfree(&configuration->included_files);
+		freeconfiguration(configuration);
 		return EXIT_FAILURE;
 	}
+	fclose(configurationfile);
+
 	for (unsigned long int i = 0; i < configuration->included_files.gl_pathc; ++i)
 	{
 		if (!isdir(configuration->included_files.gl_pathv[i]))
@@ -50,16 +55,20 @@ int main(int argc, char **argv)
 			FILE *includedfile = fopen(configuration->included_files.gl_pathv[i], "r");
 			if (parsefromfile(configuration, includedfile, configuration->included_files.gl_pathv[i], 1))
 			{
+				globfree(&configuration->included_files);
+				freeconfiguration(configuration);
 				return EXIT_FAILURE;
 			}
+			fclose(includedfile);
 		}
 	}
+	globfree(&configuration->included_files);
+
 	if (parsefromargs(configuration, arguments->configurationlist))
 	{
+		freeconfiguration(configuration);
 		return EXIT_FAILURE;
 	}
-	globfree(&configuration->included_files);
-	fclose(configurationfile);
 
 	if (validateconfiguration(configuration))
 	{
@@ -68,6 +77,8 @@ int main(int argc, char **argv)
 	}
 
 	if (arguments->dryrun) {
+		freearguments(arguments);
+		freeconfiguration(configuration);
 		return EXIT_SUCCESS;
 	}
 	freearguments(arguments);
