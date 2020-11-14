@@ -184,7 +184,7 @@ ParsedArguments *parsearguments(int argc, char *argv[])
 					Option opt = findoptshort(current[j]);
 					if (opt.key != current[j])
 					{
-						usage("option %s not recognized", current);
+						usage("option -%c not recognized", current[j]);
 						return NULL;
 					}
 					if (opt.args == NULL)
@@ -203,7 +203,7 @@ ParsedArguments *parsearguments(int argc, char *argv[])
 						// argument after option
 						if (next == NULL)
 						{
-							usage("option %s requires argument", current);
+							usage("option -%c requires argument", current[j]);
 							return NULL;
 						}
 						// skip argument

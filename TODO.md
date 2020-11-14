@@ -34,7 +34,7 @@ Extensions of supervisord, to further aid usage in containers.
 * add configuration to stop supervisor if process fails (critical)
 * add healthcheck option
 * add reload processes option (USR2)
-* add dry-run (test configuration) flag
+* ~~add dry-run (test configuration) flag~~
 * redirect all logs to stdout
 
 ## PID 1 responsibilities
