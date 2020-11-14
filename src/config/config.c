@@ -12,7 +12,7 @@ int whitespace(char c)
 	return c == ' ' || c == '\r' || c == '\n' || c == '\t';
 }
 
-int initializeblock(Configuration *configuration, char *block, int included)
+PARSE_RETURN initializeblock(Configuration *configuration, char *block, int included)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
@@ -44,9 +44,9 @@ int initializeblock(Configuration *configuration, char *block, int included)
 	}
 	else if (strcmp(block, "include") == 0)
 	{
-		if (included) {
-			// CAN'T INCLUDE IN INCLUDED FILES
-			return 2;
+		if (included)
+		{
+			return PARSE_ERROR_INCLUDE;
 		}
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
@@ -69,12 +69,12 @@ int initializeblock(Configuration *configuration, char *block, int included)
 	}
 	else
 	{
-		return 1;
+		return PARSE_ERROR_BAD_BLOCK;
 	}
-	return 0;
+	return PARSE_SUCCESS;
 }
 
-int setconfigvariable(Configuration *configuration, char *block, char *key, char *value)
+PARSE_RETURN setconfigvariable(Configuration *configuration, char *block, char *key, char *value)
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
@@ -87,7 +87,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			configuration->nodaemon = boolval;
 		}
@@ -96,7 +96,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			configuration->minfds = numval;
 		}
@@ -105,7 +105,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			configuration->minprocs = numval;
 		}
@@ -114,7 +114,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 8);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			configuration->umask = numval;
 		}
@@ -131,7 +131,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			configuration->strip_ansi = boolval;
 		}
@@ -149,7 +149,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			configuration->nocleanup = boolval;
 		}
@@ -166,7 +166,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int byteval = tobyte(value);
 			if (byteval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BYTE;
 			}
 			configuration->log.logfile_maxbytes = byteval;
 		}
@@ -175,7 +175,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int logval = tologlevel(value);
 			if (logval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_LOGLEVEL;
 			}
 			configuration->log.loglevel = logval;
 		}
@@ -184,13 +184,13 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			configuration->log.logfile_backups = numval;
 		}
 		else
 		{
-			return 1;
+			return PARSE_ERROR_BAD_KEY;
 		}
 	}
 	else if (strcmp(block, "include") == 0)
@@ -201,7 +201,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else
 		{
-			return 1;
+			return PARSE_ERROR_BAD_KEY;
 		}
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
@@ -220,7 +220,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.numprocs = numval;
 		}
@@ -229,7 +229,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.numprocs_start = numval;
 		}
@@ -238,7 +238,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 8);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.umask = numval;
 		}
@@ -247,7 +247,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.priority = numval;
 		}
@@ -256,7 +256,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.autostart = boolval;
 		}
@@ -265,7 +265,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int restartval = toautorestart(value);
 			if (restartval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_AUTORESTART;
 			}
 			programlist->program.autorestart = restartval;
 		}
@@ -274,7 +274,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.startsecs = numval;
 		}
@@ -283,7 +283,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.startretries = numval;
 		}
@@ -292,7 +292,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int exitcodes = toexitcode(value);
 			if (exitcodes < 0)
 			{
-				return -1;
+				return PARSE_ERROR_EXITCODE;
 			}
 			programlist->program.exitcodes = exitcodes;
 		}
@@ -301,7 +301,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.stopsignal = numval;
 		}
@@ -310,7 +310,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.stopwaitsecs = numval;
 		}
@@ -319,7 +319,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.stopasgroup = boolval;
 		}
@@ -328,7 +328,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.killasgroup = boolval;
 		}
@@ -337,7 +337,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.redirect_stderr = boolval;
 		}
@@ -362,7 +362,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int byteval = tobyte(value);
 			if (byteval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BYTE;
 			}
 			programlist->program.stdout_log.logfile_maxbytes = byteval;
 		}
@@ -371,7 +371,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.stdout_log.logfile_backups = numval;
 		}
@@ -380,7 +380,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int byteval = tobyte(value);
 			if (byteval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BYTE;
 			}
 			programlist->program.stdout_log.capture_maxbytes = byteval;
 		}
@@ -389,7 +389,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.stdout_log.syslog = boolval;
 		}
@@ -398,7 +398,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.stdout_log.events_enabled = boolval;
 		}
@@ -411,7 +411,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int byteval = tobyte(value);
 			if (byteval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BYTE;
 			}
 			programlist->program.stderr_log.logfile_maxbytes = byteval;
 		}
@@ -420,7 +420,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int numval = tonumber(value, 10);
 			if (numval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_NUMBER;
 			}
 			programlist->program.stderr_log.logfile_backups = numval;
 		}
@@ -429,7 +429,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int byteval = tobyte(value);
 			if (byteval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BYTE;
 			}
 			programlist->program.stderr_log.capture_maxbytes = byteval;
 		}
@@ -438,7 +438,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.stderr_log.syslog = boolval;
 		}
@@ -447,7 +447,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 			int boolval = toboolean(value);
 			if (boolval < 0)
 			{
-				return -1;
+				return PARSE_ERROR_BOOLEAN;
 			}
 			programlist->program.stderr_log.events_enabled = boolval;
 		}
@@ -458,7 +458,7 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 		}
 		else
 		{
-			return 1;
+			return PARSE_ERROR_BAD_KEY;
 		}
 	}
 	else if (strncmp(block, "fcgi-program", strlen("fcgi-program")) == 0 ||
@@ -478,12 +478,12 @@ int setconfigvariable(Configuration *configuration, char *block, char *key, char
 	}
 	else
 	{
-		return 1;
+		return PARSE_ERROR_BAD_BLOCK;
 	}
-	return 0;
+	return PARSE_SUCCESS;
 }
 
-int parseline(char *line, char *pair[2])
+PARSE_RETURN parseline(char *line, char *pair[2])
 {
 	int i = 0, key = 0, value = 0, end = 0;
 
@@ -498,7 +498,7 @@ int parseline(char *line, char *pair[2])
 	{
 		pair[0] = NULL;
 		pair[1] = NULL;
-		return 0;
+		return PARSE_SUCCESS;
 	}
 
 	// IF STARTS WITH '[', CREATE NEW BLOCK
@@ -513,13 +513,13 @@ int parseline(char *line, char *pair[2])
 		{
 			pair[0] = NULL;
 			pair[1] = NULL;
-			return 1;
+			return PARSE_ERROR_BAD_BLOCK;
 		}
 		line[i] = '\0';
 
 		pair[0] = &line[key];
 		pair[1] = NULL;
-		return 0;
+		return PARSE_SUCCESS_NEW_BLOCK;
 	}
 
 	// GO UNTIL THERE IS AN EQUAL SIGN OR EOL
@@ -537,7 +537,7 @@ int parseline(char *line, char *pair[2])
 	{
 		pair[0] = NULL;
 		pair[1] = NULL;
-		return 1;
+		return PARSE_ERROR;
 	}
 	line[end + 1] = '\0';
 
@@ -558,46 +558,75 @@ int parseline(char *line, char *pair[2])
 
 	pair[0] = &line[key];
 	pair[1] = &line[value];
-	return 0;
+	return PARSE_SUCCESS_NEW_KEY;
 }
 
 int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included)
 {
-	int parsing_error = 0;
+	PARSE_RETURN parsing_result = 0;
 	char *block = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 	int linenumber = 1;
 	char *pair[2];
 	while (fgets(line, MAX_LINE_LENGTH, conffile) != NULL)
 	{
-		parsing_error |= parseline(line, pair);
+		parsing_result = parseline(line, pair);
 
-		if (pair[0] != NULL && pair[1] == NULL)
+		if (parsing_result == PARSE_SUCCESS_NEW_BLOCK)
 		{
-			// CREATE NEW BLOCK
 			strcpy(block, pair[0]);
-			parsing_error |= initializeblock(configuration, block, included);
+			parsing_result = initializeblock(configuration, block, included);
 		}
-		else if (pair[0] != NULL && pair[1] != NULL)
+		else if (parsing_result == PARSE_SUCCESS_NEW_KEY)
 		{
-			// ADD NEW KEY-VALUE PAIR
-			parsing_error |= setconfigvariable(configuration, block, pair[0], pair[1]);
+			parsing_result = setconfigvariable(configuration, block, pair[0], pair[1]);
 		}
 
-		if (parsing_error)
+		if (parsing_result)
 		{
 			// PARSING FAILED
-			if (pair[1] == NULL)
+			char *debugline = line;
+			if (pair[1] != NULL)
 			{
-				usage("configuration file contains parsing errors:\n\t[line %d]: %s", linenumber, line);
+				sprintf(debugline, "%s = %s", pair[0], pair[1]);
 			}
-			else
+			switch (parsing_result)
 			{
-				usage("configuration file contains parsing errors:\n\t[line %d]: %s = %s", linenumber, pair[0], pair[1]);
+			case PARSE_ERROR_INCLUDE:
+				usage("included file cannot include again: '%s'\n\t[line %d]: %s", conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_BOOLEAN:
+				usage("invalid boolean value: '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_NUMBER:
+				usage("invalid numeric value: '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_BYTE:
+				usage("invalid size value (allowed units: numbers, B, kB, MB, GB): '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_LOGLEVEL:
+				usage("bad logging level name: '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_EXITCODE:
+				usage("not a valid list of exit codes: '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_AUTORESTART:
+				usage("invalid autorestart value: '%s' (file: '%s')\n\t[line %d]: %s", pair[1], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_BAD_BLOCK:
+				usage("invalid block: '%s' (file: '%s')\n\t[line %d]: %s", pair[0], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR_BAD_KEY:
+				usage("invalid key in block %s: '%s' (file: '%s')\n\t[line %d]: %s", block, pair[0], conffilename, linenumber, debugline);
+				break;
+			case PARSE_ERROR:
+			default:
+				usage("configuration file contains parsing errors: '%s'\n\t[line %d]: %s", conffilename, linenumber, debugline);
+				break;
 			}
 			free(block);
 			free(line);
-			return 1;
+			return EXIT_FAILURE;
 		}
 
 		++linenumber;
@@ -606,11 +635,12 @@ int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilena
 	free(block);
 	free(line);
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int parsefromargs(Configuration *configuration, char **arguments)
 {
+	PARSE_RETURN parsing_result = 0;
 	char *line = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
 
 	// MERGE WITH ARGUMENTS FROM THE COMMAND LINE
@@ -619,31 +649,56 @@ int parsefromargs(Configuration *configuration, char **arguments)
 	{
 		char *pair[2];
 		strcpy(line, arguments[k]);
-		if (parseline(line, pair))
-		{
-			// CONFIGURATION FAILED
-			usage("command line configuration failed:\n\t%s", line);
-			free(line);
-			return 1;
-		}
-
-		if (pair[0] != 0 && pair[1] != 0)
+		parsing_result = parseline(line, pair);
+		if (parsing_result == PARSE_SUCCESS_NEW_KEY)
 		{
 			// ADD NEW KEY-VALUE PAIR
-			setconfigvariable(configuration, "subvisord", pair[0], pair[1]);
+			parsing_result = setconfigvariable(configuration, "subvisord", pair[0], pair[1]);
+		}
+
+		if (parsing_result)
+		{
+			// CONFIGURATION FAILED
+			switch (parsing_result)
+			{
+			case PARSE_ERROR_BOOLEAN:
+				usage("invalid boolean value: '%s'", pair[1]);
+				break;
+			case PARSE_ERROR_NUMBER:
+				usage("invalid numeric value: '%s'", pair[1]);
+				break;
+			case PARSE_ERROR_BYTE:
+				usage("invalid size value (allowed units: numbers, B, kB, MB, GB): '%s'", pair[1]);
+				break;
+			case PARSE_ERROR_LOGLEVEL:
+				usage("bad logging level name: '%s'", pair[1]);
+				break;
+			case PARSE_ERROR_EXITCODE:
+				usage("not a valid list of exit codes: '%s'", pair[1]);
+				break;
+			case PARSE_ERROR_AUTORESTART:
+				usage("invalid autorestart value: '%s'", pair[1]);
+				break;
+			case PARSE_ERROR:
+			default:
+				usage("command line arguments contains parsing errors: \n\t%s=%s", pair[0], pair[1]);
+				break;
+			}
+			free(line);
+			return EXIT_FAILURE;
 		}
 		++k;
 	}
 
 	free(line);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int validateconfiguration(Configuration *configuration)
 {
 	if (!configuration->subvisord)
 	{
-		usage("%s", ".ini file does not include supervisord section");
+		usage("%s", ".ini file does not include subvisord section");
 		return EXIT_FAILURE;
 	}
 
@@ -655,13 +710,13 @@ int validateconfiguration(Configuration *configuration)
 
 	if (strlen(configuration->childlogdir) > 0 && !checkaccess(configuration->childlogdir, 0))
 	{
-		usage("could not access directory %s", configuration->childlogdir);
+		usage("%s is not an existing directory", configuration->childlogdir);
 		return EXIT_FAILURE;
 	}
 
 	if (strlen(configuration->directory) > 0 && !checkaccess(configuration->directory, 0))
 	{
-		usage("could not access directory %s", configuration->directory);
+		usage("%s is not an existing directory", configuration->directory);
 		return EXIT_FAILURE;
 	}
 
@@ -678,7 +733,7 @@ int validateconfiguration(Configuration *configuration)
 
 		if (supervisoruid < 0)
 		{
-			usage("user %s does not exist", configuration->user);
+			usage("invalid user name %s", configuration->user);
 			return EXIT_FAILURE;
 		}
 	}
@@ -699,13 +754,13 @@ int validateconfiguration(Configuration *configuration)
 
 		if (strlen(programlist->program.directory) > 0 && !checkaccess(programlist->program.directory, 0))
 		{
-			usage("could not access directory %s", programlist->program.directory);
+			usage("%s is not an existing directory", programlist->program.directory);
 			return EXIT_FAILURE;
 		}
 
 		if (strlen(programlist->program.user) > 0 && getuserid(programlist->program.user) < 0)
 		{
-			usage("user %s does not exist", programlist->program.user);
+			usage("invalid user name %s", programlist->program.user);
 			return EXIT_FAILURE;
 		}
 
