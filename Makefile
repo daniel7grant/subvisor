@@ -53,3 +53,12 @@ build/utils/platform.o: build/utils src/utils/platform.c
 
 build/utils/utils.o: build/utils src/utils/utils.c
 	$(CC) $(CFLAGS) -c -o build/utils/utils.o src/utils/utils.c
+
+test: unity build src/subvisord.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
+build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.o build/utils/utils.o build/utils/utils.o
+	$(CC) $(CFLAGS) -o build/test tests/test.c unity/src/unity.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
+		build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.o build/utils/utils.o
+	./build/test
+
+unity:
+	git clone https://github.com/ThrowTheSwitch/Unity.git unity

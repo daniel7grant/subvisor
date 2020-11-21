@@ -129,7 +129,7 @@ ParsedArguments *parsearguments(int argc, char *argv[])
 	arguments->verbosity = 1;
 	arguments->dryrun = 0;
 
-	char *current, *next;
+	char *current, *next, *equal;
 	for (int i = 1; i < argc; ++i)
 	{
 		current = argv[i];
@@ -144,13 +144,13 @@ ParsedArguments *parsearguments(int argc, char *argv[])
 					// end of arguments
 					return arguments;
 				}
-				next = strchr(current, '=');
-				if (next != NULL)
+				equal = strchr(current, '=');
+				if (equal != NULL)
 				{
 					// argument inside option
 					// set next to the arg
-					(*next) = '\0';
-					++next;
+					*equal = '\0';
+					next = equal + 1;
 				}
 				Option opt = findoptlong(&(current[2]));
 				if (opt.name == NULL)
