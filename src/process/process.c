@@ -38,8 +38,8 @@ void prioritizeprocesses()
 int shouldrestart(Process *process, int code)
 {
 	return process->config->autorestart == UNEXPECTED
-			   ? process->config->exitcodes != code
-			   : process->config->autorestart;
+			   ? code > 0 && code <= MAX_EXITCODES && process->config->exitcodes[code]
+			   : process->config->autorestart == TRUE;
 }
 
 int hasstarted(Process *process)

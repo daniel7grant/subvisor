@@ -1,4 +1,4 @@
-CFLAGS=-g -Wall -Wextra -O0
+CFLAGS=-g -Wall -Wextra -Wno-unused-parameter -O0
 LDFLAGS=
 
 default: build/subvisord
