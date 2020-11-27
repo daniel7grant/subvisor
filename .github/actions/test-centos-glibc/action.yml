@@ -1,0 +1,5 @@
+name: test-centos-glibc
+description: 'Test on CentOS with Glibc'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
