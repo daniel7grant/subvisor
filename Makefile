@@ -78,4 +78,6 @@ build/testutils.o: build tests/testutils.c
 	$(CC) $(CFLAGS) -c -o build/testutils.o tests/testutils.c
 
 unity:
-	git clone https://github.com/ThrowTheSwitch/Unity.git unity
+	[[ -d unity ]] || git clone https://github.com/ThrowTheSwitch/Unity.git unity
+
+.PHONY: test

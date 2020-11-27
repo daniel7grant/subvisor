@@ -148,3 +148,14 @@ You can build to a statically linked binary with the `-static` flag (this builds
 make LDFLAGS=-static
 ```
 
+## Testing
+
+Tests are written with [Unity](https://github.com/ThrowTheSwitch/Unity). To simplify downloading and using this testing library, there is a `make` target which automatically clones it, if it hasn't been yet.
+
+To run tests, simply call:
+
+```sh
+make test
+```
+
+If you want to run compatibility tests on multiple operating systems, you can see example Dockerfiles and GitHub Actions in the `.github` directory.
