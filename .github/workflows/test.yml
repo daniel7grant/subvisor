@@ -11,3 +11,5 @@ jobs:
       uses: ./.github/actions/test-alpine-musl
     - name: Test on Debian with Glibc
       uses: ./.github/actions/test-debian-glibc
+    - name: Test on CentOS with Glibc
+      uses: ./.github/actions/test-centos-glibc
