@@ -1,0 +1,27 @@
+on: [push]
+
+jobs:
+  test-alpine-musl:
+    runs-on: ubuntu-latest
+    name: Test code on Alpine with Musl
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test on Alpine with Musl
+      uses: ./.github/actions/test-alpine-musl
+  test-debian-glibc:
+    runs-on: ubuntu-latest
+    name: Test code on Debian with Glibc
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test on Debian with Glibc
+      uses: ./.github/actions/test-debian-glibc
+  test-centos-glibc:
+    runs-on: ubuntu-latest
+    name: Test code on CentOS with Glibc
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test on CentOS with Glibc
+      uses: ./.github/actions/test-centos-glibc
