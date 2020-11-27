@@ -15,6 +15,9 @@ build/logger: build
 build/process: build
 	mkdir -p build/process
 
+build/tests: build
+	mkdir -p build/process
+
 build/utils: build
 	mkdir -p build/utils
 
@@ -54,11 +57,25 @@ build/utils/platform.o: build/utils src/utils/platform.c
 build/utils/utils.o: build/utils src/utils/utils.c
 	$(CC) $(CFLAGS) -c -o build/utils/utils.o src/utils/utils.c
 
-test: unity build src/subvisord.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
-build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.o build/utils/utils.o build/utils/utils.o
-	$(CC) $(CFLAGS) -o build/test tests/test.c unity/src/unity.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
-		build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.o build/utils/utils.o
+test: unity build/test
 	./build/test
+
+build/test: build build/testutils.o src/subvisord.c build/config/arguments.o build/config/config.o build/config/configtypes.o \
+build/config/programconfig.o build/logger/logger.o build/process/process.o build/utils/platform.o build/utils/utils.o build/utils/utils.o
+	$(CC) $(CFLAGS) -o build/test tests/test.c \
+		unity/src/unity.c \
+		build/testutils.o \
+		build/config/arguments.o \
+		build/config/config.o \
+		build/config/configtypes.o \
+		build/config/programconfig.o \
+		build/logger/logger.o \
+		build/process/process.o \
+		build/utils/platform.o \
+		build/utils/utils.o
+
+build/testutils.o: build tests/testutils.c
+	$(CC) $(CFLAGS) -c -o build/testutils.o tests/testutils.c
 
 unity:
 	git clone https://github.com/ThrowTheSwitch/Unity.git unity

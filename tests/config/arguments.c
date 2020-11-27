@@ -1,4 +1,5 @@
 #include "../../unity/src/unity.h"
+#include "../testutils.h"
 #include "../../src/config/arguments.h"
 
 void test_handles_short_options()
@@ -50,9 +51,7 @@ void test_handles_long_options()
 
 void test_handles_long_options_with_parameters_equals()
 {
-	// fixes segfault with constants
-	char param[] = "--user=name";
-	char* argv[] = {"subvisord", param};
+	char* argv[] = {"subvisord", str("--user=name")};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -77,6 +76,7 @@ void test_fails_with_positional_parameters()
 }
 
 void test_arguments() {
+	printf("\n%s\n", "src/config/arguments");
 	RUN_TEST(test_handles_short_options);
 	RUN_TEST(test_handles_multiple_short_options);
 	RUN_TEST(test_handles_short_options_with_parameters);
