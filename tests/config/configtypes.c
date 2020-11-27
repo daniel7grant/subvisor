@@ -1,4 +1,5 @@
 #include "../../unity/src/unity.h"
+#include "../testutils.h"
 #include "../../src/config/configtypes.h"
 
 void test_toboolean_handles_truthy()

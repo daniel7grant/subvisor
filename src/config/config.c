@@ -16,31 +16,35 @@ PARSE_RETURN initializeblock(Configuration *configuration, char *block, int incl
 {
 	if (strcmp(block, "subvisord") == 0 || strcmp(block, "supervisord") == 0)
 	{
-		char *cwdpid = getcurrentdirfile("supervisord.pid");
+		if (!configuration->subvisord)
+		{
+			char *cwdpid = getcurrentdirfile("supervisord.pid");
 
-		configuration->subvisord = 1;
-		strcpy(configuration->pidfile, cwdpid);
-		configuration->nodaemon = 0;
-		configuration->minfds = 1024;
-		configuration->minprocs = 200;
-		configuration->umask = 0220;
-		strcpy(configuration->user, "");
-		strcpy(configuration->directory, "");
-		configuration->strip_ansi = 0;
-		strcpy(configuration->identifier, "subvisor");
-		strcpy(configuration->environment, "");
-		configuration->nocleanup = 0;
+			configuration->subvisord = 1;
+			strcpy(configuration->pidfile, cwdpid);
+			configuration->nodaemon = 0;
+			configuration->minfds = 1024;
+			configuration->minprocs = 200;
+			configuration->umask = 0220;
+			strcpy(configuration->user, "");
+			strcpy(configuration->directory, "");
+			configuration->strip_ansi = 0;
+			strcpy(configuration->identifier, "subvisor");
+			strcpy(configuration->environment, "");
+			configuration->nocleanup = 0;
+			configuration->programs = NULL;
 
-		const char *tempdir = gettempdir();
-		strcpy(configuration->childlogdir, tempdir);
+			const char *tempdir = gettempdir();
+			strcpy(configuration->childlogdir, tempdir);
 
-		char *cwdlog = getcurrentdirfile("supervisord.log");
-		Logger log = createlogger(cwdlog);
-		log.loglevel = 2;
-		configuration->log = log;
+			char *cwdlog = getcurrentdirfile("supervisord.log");
+			Logger log = createlogger(cwdlog);
+			log.loglevel = 2;
+			configuration->log = log;
 
-		free(cwdpid);
-		free(cwdlog);
+			free(cwdpid);
+			free(cwdlog);
+		}
 	}
 	else if (strcmp(block, "include") == 0)
 	{
