@@ -17,7 +17,7 @@ int tonumber(char *var, int base)
 {
 	char *end;
 	int value = strtol(var, &end, base);
-	if (end == var || *end != '\0' || errno == ERANGE)
+	if (end == var || *end != '\0' || errno == ERANGE || value < 0)
 	{
 		return -1;
 	}
@@ -54,7 +54,8 @@ long long int tobyte(char *var)
 			return -1;
 		}
 	}
-	return multiplier * tonumber(var, 10);
+	int value = tonumber(var, 10);
+	return value != -1 ? multiplier * value : -1;
 }
 
 LOGLEVEL tologlevel(char *var)
@@ -104,7 +105,7 @@ short *toexitcode(char *var)
 		{
 			var[i] = 0;
 			code = tonumber(lastvalue, 10);
-			if (code == -1)
+			if (code == -1 || code >= MAX_EXITCODES)
 			{
 				return NULL;
 			}
