@@ -1,0 +1,5 @@
+name: test-debian-glibc
+description: 'Test on Debian with Glibc'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'

@@ -1,0 +1,5 @@
+name: test-alpine-musl
+description: 'Test on Alpine with Musl'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
