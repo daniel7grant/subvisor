@@ -208,7 +208,7 @@ PARSE_RETURN setconfigvariable(Configuration *configuration, char *block, char *
 			return PARSE_ERROR_BAD_KEY;
 		}
 	}
-	else if (strncmp(block, "program", strlen("program")) == 0)
+	else if (strncmp(block, "program:", strlen("program:")) == 0)
 	{
 		ProgramList *programlist = peekprogramlist(configuration->programs);
 		if (strcmp(key, "command") == 0)
@@ -565,6 +565,24 @@ PARSE_RETURN parseline(char *line, char *pair[2])
 	return PARSE_SUCCESS_NEW_KEY;
 }
 
+FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
+{
+	FILE *file = NULL;
+	if (configurationfile != NULL)
+	{
+		file = fopen(configurationfile, "r");
+	}
+	else
+	{
+		int i = 0;
+		while (i < length && (file = fopen(defaultconfigurationfiles[i], "r")) == NULL)
+		{
+			++i;
+		}
+	}
+	return file;
+}
+
 int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included)
 {
 	PARSE_RETURN parsing_result = 0;
@@ -796,24 +814,6 @@ int validateconfiguration(Configuration *configuration)
 	}
 
 	return EXIT_SUCCESS;
-}
-
-FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length)
-{
-	FILE *file = NULL;
-	if (configurationfile != NULL)
-	{
-		file = fopen(configurationfile, "r");
-	}
-	else
-	{
-		int i = 0;
-		while (i < length && (file = fopen(defaultconfigurationfiles[i], "r")) == NULL)
-		{
-			++i;
-		}
-	}
-	return file;
 }
 
 void freeconfiguration(Configuration *configuration)

@@ -48,10 +48,10 @@ typedef struct Configuration
 } Configuration;
 
 extern Configuration *readfromfile(FILE *filename, char **arguments);
+extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included);
 extern int parsefromargs(Configuration *configuration, char **arguments);
 extern int validateconfiguration(Configuration *configuration);
-extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern void freeconfiguration(Configuration *configuration);
 
 #ifdef TESTING

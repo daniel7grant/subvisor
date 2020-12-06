@@ -33,9 +33,12 @@ ProgramConfiguration createdefaultprogramconfig(char *name)
 ProgramList *peekprogramlist(ProgramList *programlist)
 {
 	ProgramList *tip = programlist;
-	while (tip->next != NULL)
+	if (tip != NULL)
 	{
-		tip = tip->next;
+		while (tip->next != NULL)
+		{
+			tip = tip->next;
+		}
 	}
 	return tip;
 }
