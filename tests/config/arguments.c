@@ -4,7 +4,7 @@
 
 void test_handles_short_options()
 {
-	char* argv[] = {"subvisord", "-n"};
+	char *argv[] = {"subvisord", "-n"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -13,7 +13,7 @@ void test_handles_short_options()
 
 void test_handles_multiple_short_options()
 {
-	char* argv[] = {"subvisord", "-nk"};
+	char *argv[] = {"subvisord", "-nk"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -23,7 +23,7 @@ void test_handles_multiple_short_options()
 
 void test_handles_short_options_with_parameters()
 {
-	char* argv[] = {"subvisord", "-u", "name"};
+	char *argv[] = {"subvisord", "-u", "name"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -32,7 +32,7 @@ void test_handles_short_options_with_parameters()
 
 void test_handles_multiple_short_options_with_parameters()
 {
-	char* argv[] = {"subvisord", "-nu", "name"};
+	char *argv[] = {"subvisord", "-nu", "name"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -42,7 +42,7 @@ void test_handles_multiple_short_options_with_parameters()
 
 void test_handles_long_options()
 {
-	char* argv[] = {"subvisord", "--nodaemon"};
+	char *argv[] = {"subvisord", "--nodaemon"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -51,7 +51,7 @@ void test_handles_long_options()
 
 void test_handles_long_options_with_parameters_equals()
 {
-	char* argv[] = {"subvisord", str("--user=name")};
+	char *argv[] = {"subvisord", str("--user=name")};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -60,7 +60,7 @@ void test_handles_long_options_with_parameters_equals()
 
 void test_handles_long_options_with_parameters_space()
 {
-	char* argv[] = {"subvisord", "--user", "name"};
+	char *argv[] = {"subvisord", "--user", "name"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NOT_NULL(args);
@@ -69,13 +69,14 @@ void test_handles_long_options_with_parameters_space()
 
 void test_fails_with_positional_parameters()
 {
-	char* argv[] = {"subvisord", "positional"};
+	char *argv[] = {"subvisord", "positional"};
 	int argc = sizeof(argv) / sizeof(char *);
 	ParsedArguments *args = parsearguments(argc, argv);
 	TEST_ASSERT_NULL(args);
 }
 
-void test_arguments() {
+void test_arguments()
+{
 	printf("\n%s\n", "src/config/arguments");
 	RUN_TEST(test_handles_short_options);
 	RUN_TEST(test_handles_multiple_short_options);
