@@ -56,7 +56,7 @@ void test_parseline_parses_sections()
 	TEST_ASSERT_EQUAL_STRING("section", pair[0]);
 	TEST_ASSERT_NULL(pair[1]);
 
-	p = parseline(str(" [section]  # with comment"), pair);
+	p = parseline(str(" [section]  # comment"), pair);
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS_NEW_BLOCK, p);
 	TEST_ASSERT_EQUAL_STRING("section", pair[0]);
 	TEST_ASSERT_NULL(pair[1]);
@@ -141,6 +141,8 @@ void test_initializeblock_creates_subvisord_section()
 	p = initializeblock(configuration, "subvisord", 0);
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, p);
 	TEST_ASSERT_EQUAL(1, configuration->nodaemon);
+
+	freeconfiguration(configuration);
 }
 
 void test_initializeblock_creates_subvisord_section_with_supervisord()
@@ -158,6 +160,8 @@ void test_initializeblock_creates_subvisord_section_with_supervisord()
 	p = initializeblock(configuration, "subvisord", 0);
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, p);
 	TEST_ASSERT_EQUAL(1, configuration->nodaemon);
+	
+	freeconfiguration(configuration);
 }
 
 void test_initializeblock_creates_include_section_if_not_included()
@@ -167,6 +171,8 @@ void test_initializeblock_creates_include_section_if_not_included()
 
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, initializeblock(configuration, "include", 0));
 	TEST_ASSERT_EQUAL(PARSE_ERROR_INCLUDE, initializeblock(configuration, "include", 1));
+	
+	freeconfiguration(configuration);
 }
 
 void test_initializeblock_creates_default_program_section()
@@ -200,6 +206,8 @@ void test_initializeblock_creates_default_program_section()
 	TEST_ASSERT_EQUAL_STRING("", configuration->programs->program.user);
 	TEST_ASSERT_EQUAL_STRING("", configuration->programs->program.directory);
 	TEST_ASSERT_EQUAL_STRING("", configuration->programs->program.environment);
+	
+	freeconfiguration(configuration);
 }
 
 void test_initializeblock_fails_silently_for_not_added_sections()
@@ -214,6 +222,21 @@ void test_initializeblock_fails_silently_for_not_added_sections()
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, initializeblock(configuration, "unix_http_server", 0));
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, initializeblock(configuration, "inet_http_server", 0));
 	TEST_ASSERT_EQUAL(PARSE_SUCCESS, initializeblock(configuration, "supervisorctl", 0));
+	
+	freeconfiguration(configuration);
+}
+
+void test_initializeblock_fails_for_unknown_sections()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+
+	TEST_ASSERT_EQUAL(PARSE_ERROR_BAD_BLOCK, initializeblock(configuration, "program", 0));
+	TEST_ASSERT_EQUAL(PARSE_ERROR_BAD_BLOCK, initializeblock(configuration, "porgram:typo", 0));
+	TEST_ASSERT_EQUAL(PARSE_ERROR_BAD_BLOCK, initializeblock(configuration, "iguana", 0));
+	TEST_ASSERT_EQUAL(PARSE_ERROR_BAD_BLOCK, initializeblock(configuration, "2222", 0));
+	
+	freeconfiguration(configuration);
 }
 
 void test_config()
@@ -230,4 +253,5 @@ void test_config()
 	RUN_TEST(test_initializeblock_creates_include_section_if_not_included);
 	RUN_TEST(test_initializeblock_creates_default_program_section);
 	RUN_TEST(test_initializeblock_fails_silently_for_not_added_sections);
+	RUN_TEST(test_initializeblock_fails_for_unknown_sections);
 }
