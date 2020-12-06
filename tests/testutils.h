@@ -1,5 +1,6 @@
 #ifndef _TESTUTILS_H_INCLUDED_
 #define _TESTUTILS_H_INCLUDED_
+#define TESTING
 
 #include <stdio.h>
 #include <stdlib.h>

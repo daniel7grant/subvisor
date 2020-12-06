@@ -55,7 +55,7 @@ PARSE_RETURN initializeblock(Configuration *configuration, char *block, int incl
 	}
 	else if (strncmp(block, "program", strlen("program")) == 0)
 	{
-		configuration->programs = pushtoprogramlist(configuration->programs, createdefaultprogramconfig(block + strlen("progrem") + 1));
+		configuration->programs = pushtoprogramlist(configuration->programs, createdefaultprogramconfig(block + strlen("program") + 1));
 	}
 	else if (strncmp(block, "fcgi-program", strlen("fcgi-program")) == 0 ||
 			 strncmp(block, "eventlistener", strlen("eventlistener")) == 0 ||

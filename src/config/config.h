@@ -48,10 +48,16 @@ typedef struct Configuration
 } Configuration;
 
 extern Configuration *readfromfile(FILE *filename, char **arguments);
-int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included);
-int parsefromargs(Configuration *configuration, char **arguments);
+extern int parsefromfile(Configuration *configuration, FILE *conffile, char *conffilename, int included);
+extern int parsefromargs(Configuration *configuration, char **arguments);
 extern int validateconfiguration(Configuration *configuration);
 extern FILE *checkfiles(const char *configurationfile, const char *defaultconfigurationfiles[], int length);
 extern void freeconfiguration(Configuration *configuration);
+
+#ifdef TESTING
+PARSE_RETURN initializeblock(Configuration *configuration, char *block, int included);
+PARSE_RETURN setconfigvariable(Configuration *configuration, char *block, char *key, char *value);
+PARSE_RETURN parseline(char *line, char *pair[2]);
+#endif
 
 #endif
