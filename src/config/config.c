@@ -670,6 +670,7 @@ int parsefromargs(Configuration *configuration, char **arguments)
 	while (arguments[k] != NULL)
 	{
 		char *pair[2];
+		memset(line, 0, MAX_LINE_LENGTH);
 		strcpy(line, arguments[k]);
 		parsing_result = parseline(line, pair);
 		if (parsing_result == PARSE_SUCCESS_NEW_KEY)

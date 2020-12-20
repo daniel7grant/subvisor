@@ -671,8 +671,9 @@ void test_parsefromargs_parses_key_values()
 	initializeblock(configuration, "subvisord", 0);
 
 	char *args[] = {
-		"nodaemon=true",
-		"nocleanup=true"};
+		str("nodaemon=true"),
+		str("nocleanup=true"),
+		NULL};
 
 	TEST_ASSERT_EQUAL(EXIT_SUCCESS, parsefromargs(configuration, args));
 	TEST_ASSERT_EQUAL(1, configuration->nodaemon);
@@ -687,7 +688,9 @@ void test_parsefromargs_fails_for_unknown_keys()
 	configuration->programs = NULL;
 	initializeblock(configuration, "subvisord", 0);
 
-	char *args[] = {"iguana=true"};
+	char *args[] = {
+		str("iguana=true"),
+		NULL};
 
 	TEST_ASSERT_EQUAL(EXIT_FAILURE, parsefromargs(configuration, args));
 
