@@ -11,6 +11,8 @@ void tearDown() {}
 
 int main(void)
 {
+	srand(time(NULL));
+
 	UNITY_BEGIN();
 	test_arguments();
 	test_config();

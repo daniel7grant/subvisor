@@ -1,3 +1,8 @@
+// #define _POSIX_C_SOURCE 1
+#include <limits.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "../../unity/src/unity.h"
 #include "../testutils.h"
 #include "../../src/config/config.h"
@@ -525,6 +530,64 @@ void test_setconfigvariable_fails_for_unknown_sections()
 	freeconfiguration(configuration);
 }
 
+void test_checkfiles_open_configuration_file_if_exists()
+{
+	const char *configurationfile = randomstr("/tmp/tmp.");
+	creat(configurationfile, 0600);
+
+	const char *configurations[] = {};
+	errno = 0;
+	FILE *file = checkfiles(configurationfile, configurations, 0);
+	TEST_ASSERT_NOT_NULL(file);
+	TEST_ASSERT_EQUAL(0, errno);
+
+	unlink(configurationfile);
+}
+
+void test_checkfiles_fails_if_configuration_file_not_exists()
+{
+	const char *configurationfile = randomstr("/tmp/tmp.");
+
+	const char *configurations[] = {randomstr("/tmp/tmp.")};
+	creat(configurations[0], 0600);
+	errno = 0;
+	FILE *file = checkfiles(configurationfile, configurations, 1);
+	TEST_ASSERT_NULL(file);
+	TEST_ASSERT_EQUAL(2, errno);
+}
+
+void test_checkfiles_open_first_existing_configuration_file()
+{
+	char *configurationfile = NULL;
+
+	const char *configurations[3] = {
+		randomstr("/tmp/tmp."),
+		randomstr("/tmp/tmp."),
+		randomstr("/tmp/tmp.")};
+
+	creat(configurations[1], 0600);
+	errno = 0;
+	FILE *file = checkfiles(configurationfile, configurations, 3);
+	TEST_ASSERT_NOT_NULL(file);
+
+	unlink(configurations[1]);
+}
+
+void test_checkfiles_fails_if_default_configuration_file_not_exists()
+{
+	char *configurationfile = NULL;
+
+	const char *configurations[3] = {
+		randomstr("/tmp/tmp."),
+		randomstr("/tmp/tmp."),
+		randomstr("/tmp/tmp.")};
+
+	errno = 0;
+	FILE *file = checkfiles(configurationfile, configurations, 3);
+	TEST_ASSERT_NULL(file);
+	TEST_ASSERT_EQUAL(2, errno);
+}
+
 void test_config()
 {
 	printf("\n%s\n", "src/config/config");
@@ -547,4 +610,8 @@ void test_config()
 	RUN_TEST(test_setconfigvariable_fails_silently_for_not_added_sections);
 	RUN_TEST(test_setconfigvariable_fails_for_unknown_keys);
 	RUN_TEST(test_setconfigvariable_fails_for_unknown_sections);
+	RUN_TEST(test_checkfiles_open_configuration_file_if_exists);
+	RUN_TEST(test_checkfiles_fails_if_configuration_file_not_exists);
+	RUN_TEST(test_checkfiles_open_first_existing_configuration_file);
+	RUN_TEST(test_checkfiles_fails_if_default_configuration_file_not_exists);
 }

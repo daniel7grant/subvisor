@@ -7,5 +7,6 @@
 #include <string.h>
 
 extern char *str(const char *input);
+extern char *randomstr(const char *prefix);
 
 #endif
