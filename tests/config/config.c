@@ -1,7 +1,5 @@
 // #define _POSIX_C_SOURCE 1
 #include <limits.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 #include "../../unity/src/unity.h"
 #include "../testutils.h"
@@ -532,43 +530,50 @@ void test_setconfigvariable_fails_for_unknown_sections()
 
 void test_checkfiles_open_configuration_file_if_exists()
 {
-	const char *configurationfile = randomstr("/tmp/tmp.");
-	creat(configurationfile, 0600);
+	const char *configurationfile = createtempfile("configurationfile");
+	const char *configurations[] = {createtempfile("default1")};
 
-	const char *configurations[] = {};
 	errno = 0;
-	FILE *file = checkfiles(configurationfile, configurations, 0);
+	FILE *file = checkfiles(configurationfile, configurations, 1);
 	TEST_ASSERT_NOT_NULL(file);
 	TEST_ASSERT_EQUAL(0, errno);
 
+	char *contents = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+	fgets(contents, MAX_LINE_LENGTH, file);
+	TEST_ASSERT_EQUAL_STRING("configurationfile", contents);
+
 	unlink(configurationfile);
+	unlink(configurations[0]);
 }
 
 void test_checkfiles_fails_if_configuration_file_not_exists()
 {
-	const char *configurationfile = randomstr("/tmp/tmp.");
+	const char *configurationfile = createtempname();
+	const char *configurations[] = {createtempfile("default1")};
 
-	const char *configurations[] = {randomstr("/tmp/tmp.")};
-	creat(configurations[0], 0600);
 	errno = 0;
 	FILE *file = checkfiles(configurationfile, configurations, 1);
 	TEST_ASSERT_NULL(file);
 	TEST_ASSERT_EQUAL(2, errno);
+
+	unlink(configurations[0]);
 }
 
 void test_checkfiles_open_first_existing_configuration_file()
 {
 	char *configurationfile = NULL;
-
 	const char *configurations[3] = {
-		randomstr("/tmp/tmp."),
-		randomstr("/tmp/tmp."),
-		randomstr("/tmp/tmp.")};
+		createtempname(),
+		createtempfile("default2"),
+		createtempname()};
 
-	creat(configurations[1], 0600);
 	errno = 0;
 	FILE *file = checkfiles(configurationfile, configurations, 3);
 	TEST_ASSERT_NOT_NULL(file);
+
+	char *contents = (char *)malloc(MAX_LINE_LENGTH * sizeof(char));
+	fgets(contents, MAX_LINE_LENGTH, file);
+	TEST_ASSERT_EQUAL_STRING("default2", contents);
 
 	unlink(configurations[1]);
 }
@@ -578,14 +583,115 @@ void test_checkfiles_fails_if_default_configuration_file_not_exists()
 	char *configurationfile = NULL;
 
 	const char *configurations[3] = {
-		randomstr("/tmp/tmp."),
-		randomstr("/tmp/tmp."),
-		randomstr("/tmp/tmp.")};
+		createtempname(),
+		createtempname(),
+		createtempname()};
 
 	errno = 0;
 	FILE *file = checkfiles(configurationfile, configurations, 3);
 	TEST_ASSERT_NULL(file);
 	TEST_ASSERT_EQUAL(2, errno);
+}
+
+void test_parsefromfile_parses_files_correctly()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+
+	char *configurationfile = createtempfile(
+		"[subvisord]\n"
+		"nodaemon=true\n"
+		"nocleanup=true\n");
+	FILE *file = fopen(configurationfile, "r");
+
+	TEST_ASSERT_EQUAL(EXIT_SUCCESS, parsefromfile(configuration, file, configurationfile, 0));
+	TEST_ASSERT_EQUAL(1, configuration->nodaemon);
+	TEST_ASSERT_EQUAL(1, configuration->nocleanup);
+
+	fclose(file);
+	unlink(configurationfile);
+	freeconfiguration(configuration);
+}
+
+void test_parsefromfile_fails_on_unknown_sections()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+
+	char *configurationfile = createtempfile(
+		"[iguana]\n"
+		"nodaemon=true\n");
+	FILE *file = fopen(configurationfile, "r");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, parsefromfile(configuration, file, configurationfile, 0));
+
+	fclose(file);
+	unlink(configurationfile);
+	freeconfiguration(configuration);
+}
+
+void test_parsefromfile_fails_if_there_are_keys_before_section()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+
+	char *configurationfile = createtempfile(
+		"nodaemon=true\n");
+	FILE *file = fopen(configurationfile, "r");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, parsefromfile(configuration, file, configurationfile, 0));
+
+	fclose(file);
+	unlink(configurationfile);
+	freeconfiguration(configuration);
+}
+
+void test_parsefromfile_fails_on_unknown_keys()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+
+	char *configurationfile = createtempfile(
+		"[subvisord]\n"
+		"nodaemon=true\n"
+		"whatever\n");
+	FILE *file = fopen(configurationfile, "r");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, parsefromfile(configuration, file, configurationfile, 0));
+
+	fclose(file);
+	unlink(configurationfile);
+	freeconfiguration(configuration);
+}
+
+void test_parsefromargs_parses_key_values()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	char *args[] = {
+		"nodaemon=true",
+		"nocleanup=true"};
+
+	TEST_ASSERT_EQUAL(EXIT_SUCCESS, parsefromargs(configuration, args));
+	TEST_ASSERT_EQUAL(1, configuration->nodaemon);
+	TEST_ASSERT_EQUAL(1, configuration->nocleanup);
+
+	freeconfiguration(configuration);
+}
+
+void test_parsefromargs_fails_for_unknown_keys()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	char *args[] = {"iguana=true"};
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, parsefromargs(configuration, args));
+
+	freeconfiguration(configuration);
 }
 
 void test_config()
@@ -614,4 +720,10 @@ void test_config()
 	RUN_TEST(test_checkfiles_fails_if_configuration_file_not_exists);
 	RUN_TEST(test_checkfiles_open_first_existing_configuration_file);
 	RUN_TEST(test_checkfiles_fails_if_default_configuration_file_not_exists);
+	RUN_TEST(test_parsefromfile_parses_files_correctly);
+	RUN_TEST(test_parsefromfile_fails_on_unknown_sections);
+	RUN_TEST(test_parsefromfile_fails_if_there_are_keys_before_section);
+	RUN_TEST(test_parsefromfile_fails_on_unknown_keys);
+	RUN_TEST(test_parsefromargs_parses_key_values);
+	RUN_TEST(test_parsefromargs_fails_for_unknown_keys);
 }
