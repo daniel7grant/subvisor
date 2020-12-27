@@ -697,6 +697,224 @@ void test_parsefromargs_fails_for_unknown_keys()
 	freeconfiguration(configuration);
 }
 
+void test_validateconfiguration_fails_if_no_subvisord_section()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	// ("%s", ".ini file does not include subvisord section");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_logfile_cannot_be_opened()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	configuration->log = createlogger("/nonexistent/file.log");
+	// usage("could not write log file %s", configuration->log.logfile);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_no_childlog_directory_exists()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	strcpy(configuration->childlogdir, "/nonexistent");
+	// usage("%s is not an existing directory", configuration->childlogdir);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_chdir_target_is_not_a_directory()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	strcpy(configuration->directory, "/nonexistent");
+	// usage("%s is not an existing directory", configuration->directory);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	strcpy(configuration->user, "testusername");
+	// usage("%s", "can't drop privilege as nonroot user");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_user_does_not_exist()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	strcpy(configuration->user, "testusername");
+	// usage("invalid user name %s", configuration->user);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_root_does_not_drop_privileges()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+	// usage("%s", "subvisor is running as root. Privileges were not dropped because no user is specified in the config file. If you intend to run as root, you can set user=root in the config file to avoid this message.");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_program_does_not_have_command()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("program section %s does not specify a command", programlist->program.process_name);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_program_chdir_target_does_not_exist()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	strcpy(program.directory, "/nonexistent");
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("%s is not an existing directory", programlist->program.directory);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_no_user_exists_for_program_to_switch_to()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	strcpy(program.user, "testusername");
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("invalid user name %s", programlist->program.user);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_program_name_does_not_contain_process_num()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	program.numprocs = 10;
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("%s", "%(process_num) must be present within process_name when numprocs > 1");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_it_should_stop_as_group_but_not_kill_as_group()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	program.stopasgroup = 1;
+	program.killasgroup = 0;
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("%s", "cannot set stopasgroup=true and killasgroup=false");
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_stdout_logfile_does_not_exist()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	program.stdout_log = createlogger("/nonexistent/stdout.log");
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("could not write stdout log file %s", programlist->program.stdout_log.logfile);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_fails_if_stderr_logfile_does_not_exist()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	ProgramConfiguration program = createdefaultprogramconfig("name");
+	strcpy(program.command, "/bin/sleep 10");
+	program.stdout_log = createlogger("/tmp/stdout.log");
+	program.stderr_log = createlogger("/nonexistent/stderr.log");
+	configuration->programs = pushtoprogramlist(configuration->programs, program);
+	// usage("could not write stderr log file %s", programlist->program.stderr_log.logfile);
+
+	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
+void test_validateconfiguration_success_if_subvisord_block_exists()
+{
+	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
+	memset(configuration, 0, sizeof(Configuration));
+	configuration->programs = NULL;
+	initializeblock(configuration, "subvisord", 0);
+
+	TEST_ASSERT_EQUAL(EXIT_SUCCESS, validateconfiguration(configuration));
+	freeconfiguration(configuration);
+}
+
 void test_config()
 {
 	printf("\n%s\n", "src/config/config");
@@ -729,4 +947,25 @@ void test_config()
 	RUN_TEST(test_parsefromfile_fails_on_unknown_keys);
 	RUN_TEST(test_parsefromargs_parses_key_values);
 	RUN_TEST(test_parsefromargs_fails_for_unknown_keys);
+	RUN_TEST(test_validateconfiguration_fails_if_no_subvisord_section);
+	RUN_TEST(test_validateconfiguration_fails_if_logfile_cannot_be_opened);
+	RUN_TEST(test_validateconfiguration_fails_if_no_childlog_directory_exists);
+	RUN_TEST(test_validateconfiguration_fails_if_chdir_target_is_not_a_directory);
+	if (getcurrentuserid() == 0)
+	{
+		RUN_TEST(test_validateconfiguration_fails_if_root_does_not_drop_privileges);
+		RUN_TEST(test_validateconfiguration_fails_if_user_does_not_exist);
+	}
+	else
+	{
+		RUN_TEST(test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges);
+	}
+	RUN_TEST(test_validateconfiguration_fails_if_program_does_not_have_command);
+	RUN_TEST(test_validateconfiguration_fails_if_program_chdir_target_does_not_exist);
+	RUN_TEST(test_validateconfiguration_fails_if_no_user_exists_for_program_to_switch_to);
+	RUN_TEST(test_validateconfiguration_fails_if_program_name_does_not_contain_process_num);
+	RUN_TEST(test_validateconfiguration_fails_if_it_should_stop_as_group_but_not_kill_as_group);
+	RUN_TEST(test_validateconfiguration_fails_if_stdout_logfile_does_not_exist);
+	RUN_TEST(test_validateconfiguration_fails_if_stderr_logfile_does_not_exist);
+	RUN_TEST(test_validateconfiguration_success_if_subvisord_block_exists);
 }
