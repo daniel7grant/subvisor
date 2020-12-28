@@ -762,8 +762,9 @@ int validateconfiguration(Configuration *configuration)
 	}
 	else if (uid == 0)
 	{
-		usage("%s", "subvisor is running as root. Privileges were not dropped because no user is specified in the config file. If you intend to run as root, you can set user=root in the config file to avoid this message.");
-		return EXIT_FAILURE;
+		// usage("%s", "subvisor is running as root. Privileges were not dropped because no user is specified in the config file. If you intend to run as root, you can set user=root in the config file to avoid this message.");
+		// TODO: it should warn rather
+		// return EXIT_FAILURE;
 	}
 
 	ProgramList *programlist = configuration->programs;

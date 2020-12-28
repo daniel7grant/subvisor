@@ -747,21 +747,12 @@ void test_validateconfiguration_fails_if_chdir_target_is_not_a_directory()
 	freeconfiguration(configuration);
 }
 
-void test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges()
-{
-	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
-	memset(configuration, 0, sizeof(Configuration));
-	configuration->programs = NULL;
-	initializeblock(configuration, "subvisord", 0);
-	strcpy(configuration->user, "testusername");
-	// usage("%s", "can't drop privilege as nonroot user");
-
-	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
-	freeconfiguration(configuration);
-}
-
 void test_validateconfiguration_fails_if_user_does_not_exist()
 {
+	if (getcurrentuserid() != 0)
+	{
+		return TEST_IGNORE_MESSAGE("Run tests as root (preferably in a container) to be able to test setuid!");
+	}
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 	memset(configuration, 0, sizeof(Configuration));
 	configuration->programs = NULL;
@@ -773,16 +764,34 @@ void test_validateconfiguration_fails_if_user_does_not_exist()
 	freeconfiguration(configuration);
 }
 
-void test_validateconfiguration_fails_if_root_does_not_drop_privileges()
+void test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges()
 {
+	if (getcurrentuserid() == 0)
+	{
+		int uid = getuserid("test");
+		if (uid < 0)
+		{
+			return TEST_IGNORE_MESSAGE("Create user with name `test` to switch to for testing setuid!");
+		}
+		if (seteuid(uid) != 0 && setuid(uid) != 0)
+		{
+			return TEST_IGNORE_MESSAGE("Create user with name `test` to switch to for testing setuid!");
+		}
+	}
 	Configuration *configuration = (Configuration *)malloc(sizeof(Configuration));
 	memset(configuration, 0, sizeof(Configuration));
 	configuration->programs = NULL;
 	initializeblock(configuration, "subvisord", 0);
-	// usage("%s", "subvisor is running as root. Privileges were not dropped because no user is specified in the config file. If you intend to run as root, you can set user=root in the config file to avoid this message.");
+	strcpy(configuration->user, "testusername");
+	// usage("%s", "can't drop privilege as nonroot user");
 
 	TEST_ASSERT_EQUAL(EXIT_FAILURE, validateconfiguration(configuration));
 	freeconfiguration(configuration);
+
+	if (getcurrentuserid() == 0)
+	{
+		setuid(0);
+	}
 }
 
 void test_validateconfiguration_fails_if_program_does_not_have_command()
@@ -951,15 +960,8 @@ void test_config()
 	RUN_TEST(test_validateconfiguration_fails_if_logfile_cannot_be_opened);
 	RUN_TEST(test_validateconfiguration_fails_if_no_childlog_directory_exists);
 	RUN_TEST(test_validateconfiguration_fails_if_chdir_target_is_not_a_directory);
-	if (getcurrentuserid() == 0)
-	{
-		RUN_TEST(test_validateconfiguration_fails_if_root_does_not_drop_privileges);
-		RUN_TEST(test_validateconfiguration_fails_if_user_does_not_exist);
-	}
-	else
-	{
-		RUN_TEST(test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges);
-	}
+	RUN_TEST(test_validateconfiguration_fails_if_nonroot_tries_to_drop_privileges);
+	RUN_TEST(test_validateconfiguration_fails_if_user_does_not_exist);
 	RUN_TEST(test_validateconfiguration_fails_if_program_does_not_have_command);
 	RUN_TEST(test_validateconfiguration_fails_if_program_chdir_target_does_not_exist);
 	RUN_TEST(test_validateconfiguration_fails_if_no_user_exists_for_program_to_switch_to);
